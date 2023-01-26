@@ -9,7 +9,7 @@ function App() {
     axios.get("/app")
     .then(res =>{
        setMsg(res.data)
-    })
+    });
   },[]);
 
   return (

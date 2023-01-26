@@ -5,10 +5,12 @@ const mongoose = require("mongoose");
 mongoose.connect('mongodb://localhost:27017/hopOnDB');
 
 const driverSchema = new mongoose.Schema({
-    id: String,
+    username: String,
     name: String,
+    email: String,
+    password: String,
     verified: Boolean,
-    rides: [mongoose.ObjectId],
+    rides: Number,
     rating: Number
 });
 
