@@ -1,0 +1,149 @@
+@import url('https://cdn-uicons.flaticon.com/uicons-solid-straight/css/uicons-solid-straight.css');
+@import url('https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css');
+
+*{
+    border: 0;
+    margin: 0;
+}
+
+.bgDiv{
+    position: absolute;
+    border-radius: 10px;
+    background-color: rgb(47, 48, 49);
+    opacity: 0.1;
+    z-index: 0;
+    transition: all 1s;
+    width: 60vw;
+    height: 80vh;
+    top: 10vh;
+    left: 20vw;
+}
+
+.show{
+    display: inline-block;
+}
+
+.hide{
+    display: none;
+}
+
+.mainDiv{
+    width: 60vw;
+    height: 80vh;
+    /* background-color: white; */
+    border: solid black 2px;
+    border-radius: 10px;
+    position: relative;
+    font-family: 'Poppins',sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+    font-size: 1.2rem;
+    font-weight: bold;
+    z-index: 1;
+    transition: all 0.5s;
+    left: 20vw;
+    top: 10vh;
+}
+
+.upScale{
+    transform: scale(1);
+}
+
+.downScale{
+    transform: scale(0);
+}
+
+.mainDiv h1{
+    font-size: 2rem;
+}
+
+.docs{
+    display: flex;
+    margin-top: 40px;
+}
+
+.toSubmit, .submitted{
+    width: 30vw;
+    height: 50vh;
+    padding: 20px;
+    box-sizing: border-box;  
+}
+
+.docDiv{
+    margin-top: 20px;
+}
+
+.fi-ss-document{
+    font-size: 2rem;
+    margin-top: 10px;
+}
+
+.top{
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.textDiv{
+    display: flex;
+    flex-direction: column;
+    justify-content:space-around;
+    padding-left: 5px;
+    border-bottom: solid grey 1px;
+    width: 20vw;
+}
+
+.btm{
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    font-family: sans-serif;
+    font-weight: 100;
+}
+
+.submitted .btm{
+    color: green;
+    font-weight: bold;
+}
+
+.textDiv{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.fi-ss-badge-check{
+    color: green;
+}
+
+
+.doc{
+    /* border: solid grey 1px; */
+    height: 50px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* .submit::after{
+    content: "";
+    width: 5px;
+    height: 100%;
+    background-color: black;
+    display: inline-block;
+    z-index: 2;
+} */
+
+.content{
+    width: 100vw;
+    height: 100vh;
+}
+
+.fi-ss-angle-right{
+    cursor: pointer;
+    transition: all 0.5s;
+}
+
+.fi-ss-angle-right:hover{
+    transform: translateX(3px);
+    color: rgb(69, 66, 66);
+}
