@@ -1,0 +1,84 @@
+.mainContainer{
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.mapDiv{
+    width: 100vw;
+    height: 100vh;
+    display: inline-block;
+}
+
+.searchBox{
+    width: 300px;
+    min-height: 235px;
+    max-height: 70vh;
+    background-color: #444444;
+    position: absolute;
+    border-radius: 5px;
+    left: 20px;
+    top: 15vh;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.searchBox::-webkit-scrollbar {
+  width: 5px;
+  border-radius: 5px;
+  background-color: rgb(47, 46, 46);
+}
+
+.searchBox::-webkit-scrollbar-thumb{
+   background-color: gray;
+   border-radius: 5px;
+}
+
+.searchBox h1{
+    color: white;
+    font-size: 1.2rem;
+    font-family: 'Poppins',sans-serif;
+    margin-left: 15px;
+    margin-top: 20px;
+    font-family: 'Raleway', sans-serif;
+}
+
+.searchInput{
+    margin-top: 20px;
+    background-color: rgb(57, 56, 56);
+    /* border: solid white 2px; */
+    border-bottom: solid rgb(163, 162, 162) 1px;
+    border-radius: 5px 5px 0 0;
+    outline: none;
+    color: rgb(194, 190, 190);
+    width: 250px;
+    font-size: 1rem;
+    padding: 5px 10px;
+    font-family: 'Poppins',sans-serif;
+}
+
+.searchInput:focus{
+    background-color: rgb(47, 46, 46);
+}
+
+.searchBtn{
+    font-size: 1rem;
+    margin-top: 15px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.7s;
+    border: solid white 1px;
+    box-sizing: border-box;
+    position: relative;
+    align-self: flex-start;
+    margin-left: 15px;
+}
+
+.searchBtn:hover{
+    color: white;
+    background-color: #444444;
+}

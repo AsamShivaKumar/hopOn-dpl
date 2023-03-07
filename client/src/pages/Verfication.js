@@ -17,8 +17,8 @@ function Verification(){
 
     const name = "Arjun";
     const docs = ["Profile Photo","Registration Certificate (RC)","Driving License","PAN CARD","Vehicle Insurance","Vehicle Permit"];
-    const [submitted,setSubmitted] = useState([["Profile Photo",0],["Registration Certificate (RC)",0],["Driving License",1]]);
-    const [submit,setSubmit] = useState([["PAN CARD",2],["Vehicle Insurance",2],["Vehicle Permit",3]])
+    const [submitted,setSubmitted] = useState([]);
+    const [submit,setSubmit] = useState([]);
     const status = ["Verified","In review","Get started","Coudn't accept your document - Submit again!"]; // status of the documents
 
     const instructions = ["Your profile photo helps people recognize you. Please note that once you submit your profile photo it cannot be changed.",
@@ -27,7 +27,7 @@ function Verification(){
     "Please upload the document by taking a picture",
     "Make sure photo is not blurred and these details are clearly visible - Model, Vehicle number, Chasis number, Registration Name, Start Date, Expiry Date, Financier name or Company name. You may need to submit additional photos if your document has multiple pages or sides or if first image was not clear.",
     "If the vehicle owner name on the vehicle documents is different from mine, then I hereby confirm that I have the vehicle owner's consent to drive this vehicle on the HopOn Platform. This declaration can be treated as a No-Objection Certificate and releases HopnOn from any legal obligations and consequences."];
-    const imageUrl = ["profile.png","license.png","rc.png","pan.png","vi.png","vp.png"];
+    // const imageUrl = ["profile.png","license.png","rc.png","pan.png","vi.png","vp.png"];
 
 
     const navigate = useNavigate();
@@ -37,19 +37,37 @@ function Verification(){
     const [doc,setDoc] = useState("Profile Photo");
     const [insrt,setInsrt] = useState(instructions[0]);
     const [url,setUrl] = useState("profile.jpg");
+    const [image,setImage] = useState(null);    
     
     useEffect(() => {
+        
+        axios.post("/fetch-driver-details", {
+            username: name
+        })
+        .then(res => {
+            const driver = res.data.driver_data;
+            const docStatus = driver.docs;
+            const subDocs = [];
+            const sDocs = [];
+            
+            for(var i = 0; i < docStatus.length; i++){
+                if(docStatus[i] === 2 || docStatus[i] === 3) subDocs.push([docs[i],docStatus[i]]);
+                else sDocs.push([docs[i],docStatus[i]]);
+            }
+            setSubmitted(sDocs);
+            setSubmit(subDocs);
+        });
+
         // redirect the driver to drive page once verification is done
-        // if(cookies.driver.verified == true) navigate("/drive");        
+        // if(cookies.driver.verified == true) navigate("/drive");       
     },[]);
 
     function displayUploadDiv(evt){
         const docu = evt.target.getAttribute("doc");
-        console.log(docu);
         setDoc(docu);
         const i = docs.indexOf(docu);
         setInsrt(instructions[i]);
-        setUrl(imageUrl[i]);
+        // setUrl(imageUrl[i]);
         displayFileUpload(true);
         setBg("hide");
         setScale("downScale");
@@ -62,20 +80,29 @@ function Verification(){
     }
 
     function uploadDoc(evt){
-        const formData = new FormData();
-        formData.append('username', name);
-        formData.append('doc',doc);
-        formData.append('image',evt.target.files[0]);
-        
-        // uploading file
-        axios.post("/upload_file",formData)
-        .then(res => console.log(res));     
-        
-        setSubmit( (prev) => {
-            return prev.filter( (ele) => (ele[0] !== doc));
-        });
-        setSubmitted((prev) => ([...prev,[doc,1]]));
-        back();
+
+        const reader = new FileReader();
+        reader.readAsDataURL(evt.target.files[0]);
+
+        reader.onload = () => {
+            // uploading file
+            axios.post("/upload_file",{
+                username: name,
+                image: reader.result,
+                docInd: docs.indexOf(doc)
+            })
+            .then(res => {
+                if(res.data.success === true){
+                    setSubmit( (prev) => {
+                        return prev.filter( (ele) => (ele[0] !== doc));
+                    });
+                    setSubmitted((prev) => ([...prev,[doc,1]]));
+                    back();
+                }else{
+                    setInsrt("Couldn't upload the document. Please try again!");
+                }
+            });
+        }     
     }
 
     return (

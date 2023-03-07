@@ -9,14 +9,16 @@
 .bgDiv{
     position: absolute;
     border-radius: 10px;
+    /* background-color: #BFDB38; */
+    /* background-color: #F5EA5A; */
     background-color: rgb(47, 48, 49);
     opacity: 0.1;
     z-index: 0;
     transition: all 1s;
-    width: 60vw;
+    width: 56vw;
     height: 80vh;
     top: 10vh;
-    left: 20vw;
+    left: 22vw;
 }
 
 .show{
@@ -28,7 +30,7 @@
 }
 
 .mainDiv{
-    width: 60vw;
+    width: 56vw;
     height: 80vh;
     /* background-color: white; */
     border: solid black 2px;
@@ -41,7 +43,7 @@
     font-weight: bold;
     z-index: 1;
     transition: all 0.5s;
-    left: 20vw;
+    left: 22vw;
     top: 10vh;
 }
 
