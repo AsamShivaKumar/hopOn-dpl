@@ -138,10 +138,11 @@ export default function Home(){
         locations: coords,
         travelMode: 'car'
       }
+      const center = [pickMarker.getLngLat().lng,pickMarker.getLngLat().lat]
       ttServices.services.calculateRoute(routeOptions)
       .then(res => {
         const geoJson = res.toGeoJson();
-        map.flyTo({center: pickup});
+        map.flyTo({center: center});
         displayRoute(geoJson);
       })
     }
