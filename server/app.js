@@ -13,12 +13,22 @@ const driverSchema = new mongoose.Schema({
     name: String,
     email: String,
     mobile: Number,
-    password: String,
-    verified: {type: Boolean, default: false},
-    docs: {type: Array, default: [2,2,2,2,2,2]},
-    docImages: {type: [Buffer], default: [null,null,null,null,null,null]},
-    rides: {type: Number, default: 0},
-    rating: {type: Number,default: 0}
+    password: String,  // password hash
+    // indicates whether the driver docs have been verified
+    verified: {type: Boolean, default: false}, 
+    // stores the verification stage of each doc
+    // 0 - doc verified , 1 - doc in review, 2 - doc to be submitted
+    docs: {type: Array, default: [2,2,2,2,2,2]}, 
+    // images encoded in base-64
+    docImages: {type: [Buffer], default: [null,null,null,null,null,null]}, 
+    rides: {type: Number, default: 0}, 
+    rating: {type: Number,default: 0},
+    driving: {type: Boolean, default: false},
+    coords: {type: [Number],default: []}, // current coords of driver
+    // double value representing the direction of travel
+    heading: Number,
+    // name of the area driver is located in
+    location: {type: String, default: ""}
 });
 
 const dest = "./images";
@@ -66,6 +76,25 @@ app.post("/fetch-driver-details", (req,res) => {
         }
     });
 });
+
+
+app.get("/get-driver-coords",(req,res) => {
+    const {location} = req.query;
+    const locs = location.split(' ');
+    const reg = new RegExp(locs[0]);
+
+    Driver.find({location: reg}, (err,drivers) => {
+            if(!err){
+                const drv_details = drivers.map(drv => {
+                    return {
+                        username: drv.username,
+                        coords: drv.coords
+                    }
+                });
+                res.send({success:true, driver_details: drv_details});
+            }else res.send({success: false});
+    });    
+})
 
 app.post("/driver-regis", (req,res) => {
     const {username} = req.body;
