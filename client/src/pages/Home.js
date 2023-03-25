@@ -7,8 +7,6 @@ import DropDown from '../components/DropDown';
 import DatePicker from '../components/DatePicker';
 import axios from "axios";
 
-import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
-
 import '../styles/home.css';
 
 export default function Home(){
@@ -125,11 +123,12 @@ export default function Home(){
     }
 
     const fuzzySearch = (evt) => {
+      console.log("fuzzy");
       const query = evt.target.value;
       if(evt.target.getAttribute("name") === "pickup") setPickLoc(query);
       else setDropLoc(query);
 
-      if(query.length < 6) return;
+      if(query.length < 4) return;
       const radius = 10000;
       const limit = 5;
 
@@ -145,7 +144,7 @@ export default function Home(){
         setSuggestions(res.results);
         if(evt.target.getAttribute("name") === "pickup") setPick(true);
         else setPick(false);
-      }) 
+      }).catch(err => console.log("Error!"));
     };
 
     function pointLocation(latPos,longPos,locName){
