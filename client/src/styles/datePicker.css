@@ -1,0 +1,45 @@
+.flatpickr-calendar {
+    position: absolute;
+    left: 26px !important;
+    font-family: 'Raleway',san-serif;
+}
+
+.selected{
+    background-color: black !important;
+    border: 0 !important;
+}
+
+.dateLabel{
+    font-family: Poppins,sans-serif;
+    border-radius: 50px;
+    width: 200px;
+    text-align: center;
+    color: rgb(180, 180, 180);
+    /* border: solid black 1px; */
+    cursor: pointer;
+    transition: all 0.5s;
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    align-items: center;
+    font-size: 1.3rem;
+    padding: 5px 20px;
+    background-color:  #363636;
+}
+
+/* .dateLabel:hover span{
+    font-weight: bold;
+} */
+
+.fi-sr-calendar{
+    font-size: 1.5rem;
+    transform: translateY(2px);
+}
+
+.dateLabel:hover{
+    background-color: #2d2d2d;
+}
+
+#date{
+    visibility: hidden;
+}

@@ -1,12 +1,47 @@
+@import url('https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css');
+@import url('https://cdn-uicons.flaticon.com/uicons-bold-rounded/css/uicons-bold-rounded.css');
+
 .mainContainer{
     width: 100vw;
     height: 100vh;
     overflow: hidden;
 }
 
+nav{
+    width: 100vw;
+    height: 50px;
+    background-color: #2c2b2b;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Poppins',sans-serif;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+nav h1{
+    font-weight: 300;
+}
+
+nav a{
+    text-decoration: none;
+    color: white;
+    margin-left: 20px;
+    transition: all 0.5s;
+}
+
+nav a:hover{
+    color: rgb(194, 190, 190);
+}
+
+nav i{
+    font-size: 1.2rem;
+}
+
 .mapDiv{
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - 50px);
     display: inline-block;
 }
 
@@ -24,6 +59,29 @@
     flex-direction: column;
     align-items: center;
     overflow-y: auto;
+}
+
+.scheduleDiv{
+    width: 320px;
+    height: 235px;
+    background-color: #444444;
+    position: absolute;
+    border-radius: 5px;
+    left: 20px;
+    top: 15vh;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.fi-sr-angle-circle-right{
+    font-size: 1.5rem;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
 }
 
 .searchBox::-webkit-scrollbar {
@@ -68,17 +126,53 @@
     font-size: 1rem;
     margin-top: 15px;
     padding: 5px 10px;
-    border-radius: 5px;
+    border-radius: 2px;
     cursor: pointer;
     transition: all 0.7s;
     border: solid white 1px;
     box-sizing: border-box;
-    position: relative;
-    align-self: flex-start;
-    margin-left: 15px;
 }
 
 .searchBtn:hover{
     color: white;
     background-color: #444444;
+}
+
+.bookingBtnDiv{
+    width: 270px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.time{
+    font-size: 1.5rem;
+    background-color: #363636;
+    padding: 5px 20px;
+    border-radius: 50px;
+    color: rgb(180, 180, 180);
+    margin-left: 10px;
+}
+
+.time:focus{
+    border: 0;
+    outline: none;
+}
+
+.fi-sr-time-check{
+    font-size: 2rem;
+    position: relative;
+    /* margin-left: 10px; */
+    border-radius: 100%;
+    padding: 5px 10px 0 10px;
+    cursor: pointer;
+    transition: all 0.7s;
+}
+
+.fi-sr-time-check:hover{
+    color: rgb(26, 26, 26);
+}
+
+.timeDiv{
+    display: flex;
+    justify-content: center;
 }

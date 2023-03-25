@@ -149,7 +149,7 @@ function Verification(){
                                                     { doc[1] === 1 && <i className="fi fi-sr-clock-three"></i>}
                                                     </div>
                                                 </div>);
-                                })} 
+                                })}
                             </div>
                          </div>}
                     </div>
