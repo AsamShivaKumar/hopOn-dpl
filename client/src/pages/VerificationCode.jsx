@@ -11,25 +11,30 @@ function VerificationCode() {
     const [cookies, setCookies] = useCookies();
     const [msg, setMsg] = useState("")
     const enteredCode = useRef();
+    const token = cookies.jwtToken;
+
     const handleSubmit = (e) => {
         e.preventDefault();
         axios.post('/verificationCode', {
-        code: cookies.userDetails.code,
-        username: cookies.userDetails.username,
-        customerType: cookies.userDetails.customerType,
-        enteredCode: enteredCode.current.value
-      })
-      .then(response => {
-            if(response.data.success===true){
-                if(cookies.customerType === "Driver") navigate("/drive");
+          customerType: cookies.userDetails.customerType,
+          enteredCode: enteredCode.current.value
+        },{
+          headers: {
+            'Authorization': `Basic ${token}` 
+          }})
+        .then(response => {
+              console.log(response.data);
+              if(response.data.success===true){
+                setCookies("jwtToken",response.data.user,{path: "/"});
+                if(cookies.userDetails.customerType === "Driver") navigate("/drive");
                 else navigate("/");
-            }else{
-              setMsg(response.data.msg);
-            }
-      })
-      .catch(error => {
-        console.log(error);
-      });
+              }else{
+                setMsg(response.data.msg);
+              }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
     return (
       <div className='verificationCode' style={{ 

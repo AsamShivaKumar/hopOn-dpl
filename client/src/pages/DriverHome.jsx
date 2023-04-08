@@ -1,67 +1,89 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import "../styles/driverHome.css"
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useCookies } from 'react-cookie'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import tt from '@tomtom-international/web-sdk-maps';
+import ttServices from "@tomtom-international/web-sdk-services";
+import {io} from "socket.io-client";
 import axios from 'axios'
 
 
 function DriverHome() {
   const [trigger, setTrigger] = useState(false);
   const [onDuty, setOnDuty] = useState(false);
+  const [map, setMap] = useState(null);
+  const mapContainer = useRef(null);
   const [cookies, setCookies] = useCookies();
+  const apiKey = "z0vcTRaQzJbXUlO6Obha1DR3tMJQFhdT";
+  const [mapZoom, setMapZoom] = useState(16);
+  const [marker,setMarker] = useState(null);
+  
+  
+  
+  // use useEffect and allow only the users who are drivers ************
+  
+  useEffect(() => {
+    if(trigger === false) return;
+    navigator.geolocation.getCurrentPosition(function(position) {
+      const coords = [position.coords.longitude, position.coords.latitude];
+      const m = tt.map({
+      key: apiKey,
+      container: mapContainer.current,
+      center: coords,
+      zoom: mapZoom
+      });
+      setMap(m);
+      const mrkr = new tt.Marker({
+        element: new Image()
+      }).setLngLat(coords);
+      mrkr.getElement().src = "car_top_view.png";
+      mrkr.getElement().width = 50;
+      mrkr.addTo(m);
+      setMarker(mrkr);
+    });
+  },[trigger]);
+
+  useEffect(() => {
+    if(map === null) return;
+
+    const socket = io("http://localhost:4000");
+    
+    navigator.geolocation.watchPosition((pos => {
+      const {heading, latitude, longitude} = pos.coords;
+
+      ttServices.services.reverseGeocode({
+        key: apiKey,
+        position: [longitude,latitude]
+      })
+      .then(res => {
+        const loc = res.addresses[0].address.municipality;
+        socket.emit("driver-coords",cookies.userDetails.username,loc,{latitude,longitude,heading});
+      })
+      .catch(err => console.log(err));
+
+      marker.setLngLat([longitude,latitude]);
+      map.flyTo({center: [longitude,latitude]});
+    }))
+
+    socket.on('ride-request', (ride_id, username, locs, pois) => {
+      console.log("ride details-",ride_id, username, locs, pois);
+    });
+
+  },[map]);
+
+
   function showProfile(){
     if(trigger===true) setTrigger(false);
     else setTrigger(true);
   }
-  async function toggleDuty(){
-    if(onDuty===true) setOnDuty(false);
-    else setOnDuty(true);
-  }
-  async function callMultiple(){
-    setOnDuty(prev => !prev);
-    console.log(onDuty);
-    updateDriverCoordinates();
-    // toggleDuty();
-    // if(onDuty===true){
-    //     setTimeout(async () => {
-    //         console.log("hi")
-    //         await updateDriverCoordinates();
-    //     }, 1000);
-    // };
-  }
-  async function updateDriverCoordinates(){
-    const details = {
-        username: cookies.userDetails.username,
-        customerType: cookies.userDetails.customerType
-    }
-    await axios.post('/updateDriverCoordinates', details)
-    .then(response => {
-        console.log("Success")
-    })
-    .catch(error => {
-      console.log(error);
-    });
-  }
+  
+  
   return (
     <>
     <div>
         <Navbar func={showProfile}/>
     </div>
-    { trigger &&
-        (<div className='driverProfile'>
-                <div className='driverProfileClose' onClick={showProfile}>
-                    <CancelIcon style={{height:"30px", width:"30px"}}/>
-                </div>
-                <AccountCircleIcon style={{height:"80px", width:"80px"}}/>
-                <p>{cookies.userDetails.username}</p>
-                <p>{cookies.userDetails.email}</p>
-                <p>{cookies.userDetails.name}</p>
-                <p>{cookies.userDetails.mobile}</p>
-        </div>)
-    }
     <div className={trigger ? 'driverHomeTrigger':'driverHome'} style={{ 
       backgroundImage: `url(${process.env.PUBLIC_URL + '/bg.jpg'})`,
       backgroundRepeat: 'no-repeat'
@@ -75,7 +97,7 @@ function DriverHome() {
                     </div>
                     <div>
                         <label className="switch">
-                            <input type="checkbox" onClick={callMultiple}/>
+                            <input type="checkbox" onClick={() => setTrigger(true)}/>
                             <span className="slider"></span>
                         </label>
                     </div>
@@ -83,6 +105,7 @@ function DriverHome() {
             )
         }
     </div>
+    <div ref={mapContainer} className="mapDiv"></div>
     </>
   )
 }

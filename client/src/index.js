@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import VerificationCode from './pages/VerificationCode';
 import DriverHome from './pages/DriverHome';
+import Ride from './pages/Ride';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -20,6 +21,9 @@ root.render(
             <Route path = "/drive" element = {<DriverHome />} />
             <Route path = "/verify" element = {<Verification />} />
             <Route path="/verificationCode" element={<VerificationCode/>} />
+            {/* <Route path="/ride"> */}
+            <Route path="/ride/:rideId" element = {<Ride />}/>
+            {/* </Route> */}
             <Route path = "/*" element = {<h1>NOT FOUND</h1>} />
         </Routes>
     </BrowserRouter>

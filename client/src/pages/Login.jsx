@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRef } from 'react'
 import { Link } from 'react-router-dom';
 import "../styles/login.css"
@@ -20,24 +20,26 @@ function Login() {
         // console.log(userNameorEmail.current.value + " " + password.current.value);
   }
 
+  useEffect(() => {
+    if(cookies.jwtToken) navigate("/");
+  },[]);
+
   const handleRider = async (e) => {
       await axios.post('/login', {
-      usernameoremail: userNameOrEmail.current.value,
-      password: password.current.value,
-      customerType: "Rider"
+        usernameoremail: userNameOrEmail.current.value,
+        password: password.current.value,
+        customerType: "Rider"
       })
-      .then(response => {
-        if(response.data.success===true){
-            if(response.data.emailVerified===false){
-                setCookies("userDetails",response.data, {path: "/"})
-                navigate("/verificationCode")
-            }else{
-                navigate("/")
-            }
-        }
-        else{
-            setmsg(response.data.msg)
-        }
+      .then(res => {
+        res = res.data;
+        console.log(res,"data");
+        if(res.success===true){
+            setCookies("userDetails",{username: res.username,customerType: res.customerType,emailVerified: res.emailVerified},{path: "/"});
+            setCookies("jwtToken",res.token,{path: "/"});
+            if(res.emailVerified === false){
+              navigate("/verificationCode")
+            }else navigate("/")
+        }else setmsg(res.msg)
       })
       .catch(error => {
         console.log(error);

@@ -1,0 +1,91 @@
+
+.rideList{
+    width: 270px;
+    min-height: 100px;
+    max-height: 250px;
+    border-radius: 5px;
+    background-color: #444444;
+    position: absolute;
+    right: 20px;
+    top: calc(10vh + 20px);
+    overflow-y: auto;
+    padding: 0 5px 5px 5px;
+    z-index: 2;
+}
+
+.rideObj{
+    color: white;
+    font-family: Poppins, sans-serif;
+    width: 260px;
+    background-color: rgb(96, 95, 95);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+    margin: 10px 0;
+    padding: 5px;
+    cursor: pointer;
+    justify-content: space-between;
+}
+
+.rideObj:hover{
+    background-color: #595959;
+}
+
+.rideObj:active{
+    background-color: #444444;
+}
+
+.pickDropDiv{
+    position: relative;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.pickDropDiv::before{
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 100%;
+    /* top: 2px; */
+    border-radius: 5px;
+    position: absolute;
+    background-color: white;
+}
+
+.pickDropDiv > p{
+    padding: 0;
+    margin: 0;
+    margin-left: 10px;
+}
+
+.rideObj i{
+    font-size: 1.5rem;
+    transform: translate(5px,-10px);
+
+}
+
+.s{
+    color: red;
+}
+
+.ns{
+    color: rgb(50, 164, 50);
+}
+
+@media only screen and (max-width: 500px){
+    .rideList{
+        top: 50px;
+        width: 100vw;
+        right: 0;
+        height: 235px;
+    }
+
+    .rideObj{
+        width: calc(100vw - 10px);
+        font-size: 1rem;
+    }
+    .pickDropDiv{
+        font-size: 1.3rem;
+    }
+}

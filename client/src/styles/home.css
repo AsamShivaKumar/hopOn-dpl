@@ -1,5 +1,7 @@
 @import url('https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css');
 @import url('https://cdn-uicons.flaticon.com/uicons-bold-rounded/css/uicons-bold-rounded.css');
+@import url('https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css');
+@import url('https://cdn-uicons.flaticon.com/uicons-bold-straight/css/uicons-bold-straight.css');
 
 .mainContainer{
     width: 100vw;
@@ -37,6 +39,10 @@ nav a:hover{
 
 nav i{
     font-size: 1.2rem;
+}
+
+.fi-bs-steering-wheel{
+    font-size: 1.3rem;
 }
 
 .mapDiv{
@@ -142,6 +148,15 @@ nav i{
     width: 270px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+}
+
+.scheduleBtn{
+    background-color: transparent;
+    font-size: 2rem;
+    padding: 0;
+    margin-top: 15px;
+    color: white;
 }
 
 .time{
@@ -175,4 +190,85 @@ nav i{
 .timeDiv{
     display: flex;
     justify-content: center;
+}
+
+.rideShare{
+    background-color: #444444;
+    border-radius: 5px;
+    width: 300px;
+    color: white;
+    font-family: Poppins, sans-serif;
+    position: absolute;
+    left: 20px;
+    top: 15vh;
+    /* z-index: 3; */
+    transition: all 1s;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    /* transform: translateY(240px); */
+    justify-content: space-between;
+    /* align-items: center; */
+}
+
+.show{
+    transform: translateY(240px);
+}
+
+.yesNo{
+    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.yesNo i{
+    cursor: pointer;
+    transition: all 1s;
+}
+
+.fi-sr-cross-circle:hover{
+    color: rgb(203, 69, 69);
+}
+
+.fi-sr-badge-check:hover{
+    color: rgb(52, 167, 52);
+}
+
+.msgDiv{
+    position: absolute;
+    right: 20px;
+    top: 60px;
+    background-color: #444444;
+    border-radius: 5px;
+    padding: 10px;
+    color: white;
+    font-family: Poppins,sans-serif;
+    border-bottom: solid red 2px;
+}
+
+@media only screen and (max-width: 500px){
+    .searchBox, .scheduleDiv{
+        width: 100vw;
+        left: 0;
+        top: 50px;
+        border-radius: 0;
+        /* align-items: flex-start; */
+        padding-left: 15px;
+    }
+
+    .searchBox h1{
+        margin-left: 0;
+    }
+
+    .rideShare{
+        width: 100vw;
+        left: 0;
+        border-radius: 0;
+        font-size: 1.5rem;
+    }
+
+    .yesNo{
+        font-size: 2rem;
+    }
+
 }

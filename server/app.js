@@ -6,6 +6,15 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
+const server = require('http').createServer(app);
+const io = require('socket.io')(server,{
+    cors:{
+        origin: 'http://localhost:3000',
+        credentials: true,
+        methods: ["GET","POST"]
+    }
+});
+
 mongoose.connect('mongodb://localhost:27017/hopOnDB');
 
 app.use(exp.json());
@@ -75,12 +84,70 @@ const riderSchema = new mongoose.Schema({
 const scheduledRideSchema = new mongoose.Schema({
     username: String,
     date: Date,
-    time: String
+    time: String,
+    pickup: [Number],
+    drop: [Number],
+    pickLoc: String,
+    dropLoc: String,
+    driver: String,
+    location: String,
+    dist: Number,
+    travelTime: Number
+});
+
+const rideSchema = new mongoose.Schema({
+    usernames: String,
+    pickup: [Number],
+    drop: [Number],
+    pickLoc: String,
+    dropLoc: String,
+    otp: Number,
+    location: String,
+    travelTime: Number,
+    dist: Number,
+    driver: String
 });
 
 const Driver = new mongoose.model("Driver", driverSchema);
 const ScheduledRide = new mongoose.model("ScheduledRide", scheduledRideSchema);
-const Rider = new mongoose.model("Rider",riderSchema);
+const Rider = new mongoose.model("Rider", riderSchema);
+const Ride = new mongoose.model("Ride", rideSchema);
+
+io.on("connection", socket => {
+    
+    socket.on("driver-coords", (user_name,location,coords) => {
+        io.emit(`rider-${location}`,user_name,location,coords);
+    });
+
+    socket.on("ride-request", (req) => {
+        const {locs, otp, token, location, time, dist, pois} = req;
+        jwt.verify(token, process.env.JWT_SECRET_KEY, function(err,user){
+            if(err){
+                // can emit an event regarding failure of ride creation
+                console.log("Authorization failed during creation of ride object!");
+            }else{
+                user = user._doc;
+                const newRide = new Ride({
+                    username: user.username,
+                    pickup: locs[0],
+                    drop: locs[1],
+                    otp: otp,
+                    location: location,
+                    travelTime: time,
+                    dist: dist,
+                    pickLoc: pois[0],
+                    dropLoc: pois[1]
+                });
+                // console.log(newRide._id,"id");
+                newRide.save();
+                io.emit('ride-request', newRide._id, user.username, locs, pois);
+                io.emit(`ride-res-${user.username}`, newRide);
+            }
+        });
+    })
+
+
+})
 
 app.post("/upload_file", (req,res) => {
     const {username,image,docInd} = req.body;
@@ -130,23 +197,23 @@ app.get("/get-driver-coords",(req,res) => {
     });    
 })
 
-app.post("/driver-regis", (req,res) => {
-    const {username} = req.body;
-    const newUser = new Driver({
-        username: username
-    });
-    newUser.save();
-    res.send("Registration successful");
-});
 
-app.post("/schedule-ride", (req,res) => {
-    const {date,time} = req.body;
+app.post("/schedule-ride", authenticate, (req,res) => {
+    const {date,time,locs, location, travelTime, dist, pois} = req.body;
+
     const newRide = new ScheduledRide({
         date: date,
-        time: time
+        time: time,
+        pickup: locs[0],
+        drop: locs[1],
+        pickLoc: pois[0],
+        dropLoc: pois[1],
+        location: location,
+        travelTime: travelTime,
+        dist: dist
     });
     newRide.save();
-    res.send({success: true});
+    res.send({success: true, rideObj: newRide});
 });
 
 // middle-ware to authenticate users
@@ -174,34 +241,34 @@ function authenticate(req,res,next){
 
 // -----------------------------------------------  PREM'S CODE  ----------------------------------------------- //
 
-app.post("/verificationCode",async function(req, res){
-    if((req.body.code).toString() === req.body.enteredCode){
-        const customerType = req.body.customerType
+app.post("/verificationCode", authenticate, function(req, res){
+    const code = req.user.code;
+    if(code == req.body.enteredCode){
+        const customerType = req.body.customerType;
+        const name = req.user._doc.username;
         if(customerType==="Driver"){
-            Driver.findOne({username: req.body.username},(err,driver) => {
+            Driver.findOne({username: name},(err,driver) => {
                 if(err) console.log(err)
                 else{
                     driver.emailVerified = true;
                     driver.save();
+                    res.send({success: true, user: jwt.sign({name: driver.name, username: driver.username}, process.env.JWT_SECRET_KEY)});
                 }
             })
         }else{
-            Rider.findOne({username: req.body.username},(err,rider) => {
+            Rider.findOne({username: name},(err,rider) => {
                 if(err) console.log(err)
                 else{
+                    console.log(rider);
                     rider.emailVerified = true;
                     rider.save();
+                    res.send({success: true, user: jwt.sign({name: rider.name, username: rider.username}, process.env.JWT_SECRET_KEY)});
                 }
             })
         }
-        // console.log(true)
-        res.send({success: true})
-        
     }
     else{
-        // console.log(false)
         res.send({success: false, msg: "Invalid code!!"})
-
     }
 })
 
@@ -290,7 +357,6 @@ app.post('/register', async function(req, res){
                                         return;
                                     }
                                 });
-                                console.log(saltRounds,req.body.password);
                                 const hash = bcrypt.hashSync(req.body.password, saltRounds);
                                 const newRider = new Rider({
                                     username: req.body.username,
@@ -358,12 +424,15 @@ app.post("/login",async function(req, res){
                                     if(driver.emailVerified===false){
                                         code = sendEmail(driver.email)
                                     }
+
+                                    const jwtToken = jwt.sign({...driver,code: code}, process.env.JWT_SECRET_KEY);
+                                    
                                     res.send({
                                         success:true,
                                         username: driver.username,
                                         customerType: driver.customerType,
-                                        emailVerified:driver.emailVerified,
-                                        code: code
+                                        emailVerified: driver.emailVerified,
+                                        token: jwtToken
                                     })
                                 }
                                 else{
@@ -381,12 +450,14 @@ app.post("/login",async function(req, res){
                         if(driver.emailVerified===false){
                             code = sendEmail(driver.email)
                         }
+                        const jwtToken = jwt.sign({...driver,code: code}, process.env.JWT_SECRET_KEY);
+                        
                         res.send({
                             success:true,
                             username: driver.username,
                             customerType: driver.customerType,
                             emailVerified: driver.emailVerified,
-                            code: code
+                            token: jwtToken
                         })
                     }
                     else{
@@ -417,12 +488,14 @@ app.post("/login",async function(req, res){
                                     if(rider.emailVerified===false){
                                         code = sendEmail(rider.email)
                                     }
+                                    const jwtToken = jwt.sign({...rider,code: code}, process.env.JWT_SECRET_KEY);
+                                    
                                     res.send({
                                         success:true,
                                         username: rider.username,
                                         customerType: rider.customerType,
-                                        emailVerified:rider.emailVerified,
-                                        code: code
+                                        emailVerified: rider.emailVerified,
+                                        token: jwtToken
                                     })
                                 }
                                 else{
@@ -440,12 +513,14 @@ app.post("/login",async function(req, res){
                         if(rider.emailVerified===false){
                             code = sendEmail(rider.email)
                         }
+                        const jwtToken = jwt.sign({...rider,code: code}, process.env.JWT_SECRET_KEY);
+                        
                         res.send({
                             success:true,
                             username: rider.username,
                             customerType: rider.customerType,
-                            emailVerified:rider.emailVerified,
-                            code: code
+                            emailVerified: rider.emailVerified,
+                            token: jwtToken
                         })
                     }
                     else{
@@ -457,39 +532,6 @@ app.post("/login",async function(req, res){
     }
 });
 
-app.post("/verificationCode",async function(req, res){
-    if((req.body.code1).toString() === req.body.enteredCode){
-        const customerType = req.body.customerType
-        if(customerType==="Driver"){
-            Driver.findOne({username: req.body.username},(err,driver) => {
-                if(err) console.log(err)
-                else{
-                    driver.emailVerified = true;
-                    driver.save();
-                }
-            })
-        }else{
-            Rider.findOne({username: req.body.username},(err,rider) => {
-                if(err) console.log(err)
-                else{
-                    rider.emailVerified = true;
-                    rider.save();
-                }
-            })
-        }
-        // console.log(true)
-        res.send({success: true})
-        
-    }
-    else{
-        // console.log(false)
-        res.send({success: false, msg: "Invalid code!!"})
-
-    }
-});
-
-
-
-app.listen(4000, () => {
+server.listen(4000, () => {
     console.log("Server started on port 4000")
 });
