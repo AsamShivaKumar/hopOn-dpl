@@ -49,7 +49,8 @@ const driverSchema = new mongoose.Schema({
     // double value representing the direction of travel
     heading: Number,
     // name of the area driver is located in
-    location: {type: String, default: ""}
+    location: {type: String, default: ""},
+    reg_no: {type: String, default: "XX0000"}
 });
 
 const riderSchema = new mongoose.Schema({
@@ -96,22 +97,31 @@ const scheduledRideSchema = new mongoose.Schema({
 });
 
 const rideSchema = new mongoose.Schema({
-    usernames: String,
-    pickup: [Number],
-    drop: [Number],
-    pickLoc: String,
-    dropLoc: String,
-    otp: Number,
+    usernames: [String],
+    pickup: [[Number]],
+    drop: [[Number]],
+    pickLoc: [String],
+    dropLoc: [String],
+    otp: [Number],
     location: String,
-    travelTime: Number,
-    dist: Number,
-    driver: String
+    travelTime: [Number],
+    dist: [Number],
+    driver: String,
+    sharing: {type: Number, default: 0}
+});
+
+const continuousBookingSchema = new mongoose.Schema({
+    username: String,
+    fromdate: String,
+    todate: String,
+    excludedates: Array
 });
 
 const Driver = new mongoose.model("Driver", driverSchema);
 const ScheduledRide = new mongoose.model("ScheduledRide", scheduledRideSchema);
 const Rider = new mongoose.model("Rider", riderSchema);
 const Ride = new mongoose.model("Ride", rideSchema);
+const ContBooking = new mongoose.model("ContBooking", continuousBookingSchema);
 
 io.on("connection", socket => {
     
@@ -120,7 +130,7 @@ io.on("connection", socket => {
     });
 
     socket.on("ride-request", (req) => {
-        const {locs, otp, token, location, time, dist, pois} = req;
+        const {locs, otp, token, location, time, dist, pois, sharing} = req;
         jwt.verify(token, process.env.JWT_SECRET_KEY, function(err,user){
             if(err){
                 // can emit an event regarding failure of ride creation
@@ -128,25 +138,132 @@ io.on("connection", socket => {
             }else{
                 user = user._doc;
                 const newRide = new Ride({
-                    username: user.username,
-                    pickup: locs[0],
-                    drop: locs[1],
-                    otp: otp,
+                    usernames: [user.username],
+                    pickup: [locs[0]],
+                    drop: [locs[1]],
+                    otp: [otp],
                     location: location,
-                    travelTime: time,
-                    dist: dist,
-                    pickLoc: pois[0],
-                    dropLoc: pois[1]
+                    travelTime: [time],
+                    dist: [dist],
+                    pickLoc: [pois[0]],
+                    dropLoc: [pois[1]],
+                    sharing: sharing
                 });
                 // console.log(newRide._id,"id");
                 newRide.save();
-                io.emit('ride-request', newRide._id, user.username, locs, pois);
+                io.emit('ride-request', newRide._id, user.username, locs, pois, time, dist);
                 io.emit(`ride-res-${user.username}`, newRide);
             }
         });
+    });
+
+    socket.on(`get-driver-coords`, (location) => {
+        io.emit(`send-coords-${location}`,{});
+    });
+
+    socket.on('accept-ride',(ride_id,token) => {
+        jwt.verify(token, process.env.JWT_SECRET_KEY, (err,user) => {
+            if(err) console.log(err);
+            else{
+                user = user._doc;
+                Ride.findOne({_id: ride_id}, (err,ride) => {
+                    if(err) socket.emit(`${user.username}-ridereq-response`, false);
+                    else{
+                        if(!ride.driver){
+                            ride.driver = user.username;
+                            ride.mobile = user.mobile;
+                            ride.reg_no = user.reg_no;
+                            ride.save();
+                            socket.emit(`${user.username}-ridereq-response`, true)
+                            console.log(`${ride_id}-accepted`);
+                            socket.emit(`${ride_id}-accepted`, user);
+                            
+                        }else socket.emit(`${user.username}-ridereq-response`, false)
+                    }
+                })
+            }
+        });
+    });
+
+    // socket.on('*/accept', )
+
+});
+
+app.post("/continuousbooking", (req, res) => {
+    const username = req.body.username;
+    
+    Rider.findOne({ username: username}, (err,user) => {
+        if(err){
+            res.send({success: false});
+        }else{
+            var strtDt  = new Date(req.body.fromDate);
+            var endDt  = new Date(req.body.toDate);
+            var flag = 0; // false
+            let dates = []
+
+            if (endDt >= strtDt){
+               flag = 1; // true
+            }
+            console.log(flag);
+            if(flag === 1){
+                const weekdaysStr = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const weekdays = req.body.weekdays;
+                let wkdys = []
+                for(let i = 0; i < weekdays.length; i++){
+                    wkdys.push(weekdaysStr[weekdays[i]]);
+                }
+                let a = strtDt;
+                let b = endDt;
+                while(b >= a){
+                    if(wkdys.includes(weekdaysStr[a.getDay()])){
+                        dates.push(a.toJSON().slice(0,10));
+                    }
+                    a.setDate(a.getDate() + 1);
+                }
+                strtDt = new Date(req.body.fromDate);
+                let optDates = req.body.dates
+                let n = req.body.dates.length
+                for(let i = 0; i <= n; i++){
+                    let newDate = new Date(optDates[i]);
+                    if(strtDt < newDate && newDate < endDt && dates.includes(newDate) === false){
+                        dates.push(newDate.toJSON().slice(0,10));
+                    }
+                }
+            }
+            const newBooking = ContBooking({
+                username: username,
+                fromdate: req.body.fromDate,
+                todate: req.body.toDate,
+                excludedates: dates
+            });
+            newBooking.save();
+        }
+    });
+});
+
+// function to verify the driver
+app.post("/verify-ride-driver", authenticate ,(req,res) => {
+    const driver = req.user._doc;
+    const ride_id = req.body.ride_id;
+
+    Ride.findOne({_id: ride_id}, (err,ride) => {
+        console.log(err,ride);
+        if(err || !ride) res.send({verified: false});
+        else if(ride.driver === driver.username) res.send({verified: true, rideObj: ride});
+        else res.send({verified: false});
     })
+});
 
+app.post("/verify-ride-user", authenticate, (req,res) => {
+    const user = req.user._doc;
+    const ride_id = req.body.ride_id;
 
+    Ride.findOne({_id: ride_id}, (err,ride) => {
+        console.log(ride.usernames.indexOf(user.username),"index")
+        if(err || !ride) res.send({verified: false});
+        else if(ride.usernames.indexOf(user.username) >= 0) res.send({verified: true, rideObj: ride});
+        else res.send({verified: false});
+    }) 
 })
 
 app.post("/upload_file", (req,res) => {

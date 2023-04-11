@@ -1,0 +1,59 @@
+.requestCard{
+    height: 130px;
+    width: 410px;
+    background-color: rgba(47,48,49,.2);
+    border: 2px solid black;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.requestHeader{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-content: center;
+    padding: 5px;
+}
+
+.requestFooter{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+.request_buttons{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.request_buttons > button{
+    border: 2px solid black;
+    padding: 5px;
+    border-radius: 2px;
+}
+
+.requestBody{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.accept {
+    background-color: rgba(0, 128, 0, 0.584);
+}
+
+.accept:hover{
+    background-color: green;
+}
+
+.reject{
+    background-color: rgba(220, 20, 60, 0.584);
+}
+
+.reject:hover{
+    background-color: crimson;
+}

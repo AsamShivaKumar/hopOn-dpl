@@ -11,7 +11,8 @@ export default function DatePicker(props){
     const [date,setDate] = useState("Select date");
 
     useEffect(() => {
-        flatpickr(inputRef.current,{theme: "dark", dateFormat: "d-m-Y", onChange: handleChange, disableMobile: "true"});
+        flatpickr(inputRef.current,{theme: "dark", dateFormat: "d-m-Y", onChange: handleChange, disableMobile: "true", minDate: "today",
+        maxDate: new Date().fp_incr(30)});
     }, [props]);
 
     function handleChange(selectedDates, dateStr, instance){

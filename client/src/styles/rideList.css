@@ -13,6 +13,17 @@
     z-index: 2;
 }
 
+.rideList::-webkit-scrollbar {
+    width: 5px;
+    border-radius: 5px;
+    background-color: rgb(47, 46, 46);
+}
+  
+.rideList::-webkit-scrollbar-thumb{
+     background-color: gray;
+     border-radius: 5px;
+}
+
 .rideObj{
     color: white;
     font-family: Poppins, sans-serif;
@@ -61,16 +72,28 @@
 
 .rideObj i{
     font-size: 1.5rem;
-    transform: translate(5px,-10px);
-
 }
 
 .s{
-    color: red;
+    color: rgb(215, 60, 60);
 }
 
 .ns{
     color: rgb(50, 164, 50);
+}
+
+.dateTime{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.dateTime p{
+    width: 70px;
+    margin-right: 7px;
+    padding: 0;
+    font-size: 0.7rem;
+    text-align: right;
 }
 
 @media only screen and (max-width: 500px){
@@ -78,11 +101,17 @@
         top: 50px;
         width: 100vw;
         right: 0;
-        height: 235px;
+        min-height: 235px;
+        overflow-y: auto;
+        border-radius: 0;
+    }
+
+    .rideObj:first-child{
+        margin-top: 30px;
     }
 
     .rideObj{
-        width: calc(100vw - 10px);
+        width: calc(100vw - 20px);
         font-size: 1rem;
     }
     .pickDropDiv{

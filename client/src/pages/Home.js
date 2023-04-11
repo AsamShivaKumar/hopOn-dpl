@@ -9,6 +9,7 @@ import DatePicker from '../components/DatePicker';
 import RideList from '../components/RideList';
 import axios from "axios";
 import {io} from "socket.io-client";
+import {stringify, parse} from 'flatted';
 
 import '../styles/home.css';
 
@@ -35,20 +36,18 @@ export default function Home(){
     const [time,setTime] = useState("");
     const [travelTime, setTravelTime] = useState(0);
     const [dist,setDist] = useState(0);
-    const [book,setBook] = useState(false);
-    const [comf, setComf] = useState(false);
+    // const [book,setBook] = useState(false);
+    // const [comf, setComf] = useState(false);
     const rideShareDiv = useRef(null);
     const [msg,setMsg] = useState("");
     const [rideList,setRideList] = useState([]);
     const [showRideList,setShowRideList] = useState(true);
     const [cookies, setCookies] = useCookies();
-    
-    const socket = io("http://localhost:4000");
+    // const [driverCoords,setDriverCoords] = useState({});
+    const [socket,setSocket] = useState(null);
+
     const token = cookies.jwtToken;
     const user = cookies.userDetails;
-
-    const driver_data = new Map();
-    let car_markers = new Map();
 
     useEffect(() => {
       
@@ -65,38 +64,60 @@ export default function Home(){
           setMap(m);
       });
 
+      setSocket(io("http://localhost:4000"));
+      // setCookies('driverCoords', stringify({}));
+
       return () => {if(map != null) map.remove()};
     },[]);
 
     useEffect(() => {
-      if(map !== null && driver_data.size === 0){
+      if(map !== null && socket !== null){
         ttServices.services.reverseGeocode({
           key: apiKey,
           position: [mapLong, mapLat],
         }).then(res => {
            setUserLocation(res.addresses[0].address.municipality);
-
-           // fetch driver coords in the same location
-           axios.get("/get-driver-coords",{
-              params: {location: res.addresses[0].address.municipality}
-           }).then(res => {
-            const dr_details = res.data.driver_details;
-            for(var i = 0; i < dr_details.length; i++)
-              driver_data.set(dr_details[i].username,dr_details[i].coords);
-            updateCarMarkers();
-          });
+           socket.emit("get-driver-coords", res.addresses[0].address.municipality);
         });
       }
         
-    },[map]);
+    },[map,socket]);
 
     useEffect(() => {
-      if(userLocation !== ""){
+      if(socket !== null){
         socket.on(`rider-${userLocation}`, (user_name,location,coords) => {
-          console.log("Info received -",user_name,location,coords);
+          // console.log(cookies.driverCoords,"coords-driver");
+          const serializedDriverCoords = cookies.driverCoords;
+          const driverCoords = serializedDriverCoords ? parse(serializedDriverCoords) : {};
+          // console.log(driverCoords);
+          if(driverCoords[user_name]){
+            const driver_crd = driverCoords[user_name];
+            driver_crd.coords = [coords.longitude,coords.latitude];
+            driver_crd.marker.setLngLat([coords.longitude,coords.latitude]);
+            if(coords.heading) driver_crd.marker.getElement().style.transform = `rotate(${coords.heading})`;
+            // driver_crd.marker.getElement().style.transform = `rotate(30deg)`;
+            driverCoords[user_name] = driver_crd;
+            setCookies('driverCoords',stringify(driverCoords));
+          }else{
+            const marker = new tt.Marker({
+              element: new Image()
+            }).setLngLat([coords.longitude,coords.latitude]);
+            marker.getElement().src = "car_top_view.png";
+            marker.getElement().width = 50;
+            marker.addTo(map);
+            console.log("here!");
+            if(coords.heading) marker.getElement().style.transform = `rotate(${coords.heading}deg)`;
+            const driver_crd = {
+              coords: [coords.longitude,coords.latitude],
+              marker: marker
+            };
+            driverCoords[user_name] = driver_crd;
+            // console.log(stringify(driverCoords),"json");
+            setCookies('driverCoords',stringify(driverCoords));
+          }
         })
       }
-    },[userLocation]);
+    },[userLocation,socket]);
 
     useEffect(() => {
       if(pickMarker !== null){
@@ -105,9 +126,6 @@ export default function Home(){
           pickMarker.setLngLat([lngLat.lng,lngLat.lat]);
           setCenter(true);
           setLocs(prevLocs => [[lngLat.lng,lngLat.lat],prevLocs[1]]);
-          // reverseGeocode(lngLat.lng,lngLat.lat)
-          // .then(res => console.log(res,"result"))
-          // console.log(res,"Result")
         });
       }
     },[pickMarker]);
@@ -128,30 +146,6 @@ export default function Home(){
       if(locs[0] !== 0 && locs[1] !== 0) createRoute(locs[0],locs[1]);
     },[locs]);
 
-    // updating driver coords
-    function updateCarMarkers(){
-      for(const [username, coords] of driver_data){
-        let marker = car_markers.get(username);
-        if(marker) marker.setLngLat(coords);
-        else {
-          marker = new tt.Marker({
-            element: new Image()
-          }).setLngLat(coords);
-          marker.getElement().src = "car_top_view.png";
-          marker.getElement().width = 50;
-          marker.addTo(map);
-          car_markers.set(username,marker);
-        }
-      }
-
-      // removing car markers which are away from location
-      for(const [username, marker] of car_markers){
-        if(!driver_data.get(username)){
-          marker.remove();
-          car_markers.delete(username);
-        }
-      }
-    }
 
     const fuzzySearch = (evt) => {
       const query = evt.target.value;
@@ -325,13 +319,14 @@ export default function Home(){
     }
 
     function bookNow(sharing){
-      // if(sharing)
+      if(sharing) sharing = 0
+      else sharing = 1
 
       const otp = Math.round(Math.random()*(10000 - 999)) + 1000;
       // request to server with {locs,otp,username,location} - use socket ==> at server, invoke an event to all drivers in that location
       // ==> at driver side, receive th event and display the request in the request bar
       // if a driver approves a ride, trigger evt to server ==> event on this page ==> ride starts after otp verification
-      const reqObj = {locs: locs,otp: otp,token: token,location: userLocation, time: travelTime, dist: dist, pois: [pickLoc,dropLoc]};
+      const reqObj = {locs: locs,otp: otp,token: token,location: userLocation, time: travelTime, dist: dist, pois: [pickLoc,dropLoc], sharing: sharing};
       socket.emit("ride-request",reqObj);
       socket.on(`ride-res-${user.username}`, (rideObj) => {
         let rides = cookies.rides;
@@ -343,13 +338,18 @@ export default function Home(){
     }
 
     function showOrHideRideList(){
-      if(!cookies.rides){
+      if(!cookies.rides && !cookies.scheduledRides){
         setMsg("No scheduled or active rides!!")
         setInterval(() => setMsg(""),6000);
         return;
       }
-      if(showRideList) setRideList(Object.values(cookies.rides))
-      else setRideList([])
+      if(showRideList){
+        const rideArr = []
+        if(cookies.rides) rideArr.push(...Object.values(cookies.rides))
+        if(cookies.scheduledRides) rideArr.push(...Object.values(cookies.scheduledRides))
+
+        setRideList(rideArr);
+      }else setRideList([])
       setShowRideList(!showRideList);
     }
 

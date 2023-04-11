@@ -1,0 +1,108 @@
+.continuousBooking{
+    width: 100vw;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+}
+
+.cont_logo{
+    padding-top: 20px;
+    padding-left: 20px;
+}
+
+.cont_booking_form{
+    
+    overflow: scroll;
+    border: 2px solid black;
+    border-radius: 5px;
+    width: 450px;
+    height: 670px;
+    z-index: 1;
+    background-color: rgba(47,48,49,.2);
+    position: relative;
+    left: calc(50vw - 200px);
+    top: calc(50vh - 400px);
+}
+
+.form{
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 35px;
+    overflow: scroll;
+}
+
+.cont__form__element{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.cont__form__element > div > input, .cont__form__element > input{
+    height: 30px;
+    background-color: rgba(47,48,49,0);
+    border: 0px;
+    border-bottom: 2px solid black;
+    border-radius: 3px;
+    width: 280px;
+    font-size: medium;
+}
+
+input::placeholder{
+    color: black;
+    font-size: medium;
+}
+
+input:focus::placeholder{
+    color: transparent;
+}
+
+input:focus{
+    outline: none;
+}
+
+.cont__form__title{
+    margin-top: 20px;
+    font-size: 35px;
+    font-weight: 800;
+}
+
+.redirectRiderHome{
+    text-decoration: none;
+    color: black;
+}
+
+.redirectRiderHome:hover{
+    text-decoration: underline;
+}
+
+input[type=submit]{
+    border: 2px solid black;
+    width: 160px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    box-shadow: 200lvw;
+    height: 30px;
+}
+
+input[type=submit]:hover{
+    background-color: rgba(0, 0, 0);
+}
+
+.weekdays{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.weekdays > label > input {
+    height: 14px;
+    width: 14px;
+}
+
+.optDates{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+*::-webkit-scrollbar {display:none;}

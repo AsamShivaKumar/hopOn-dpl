@@ -244,7 +244,12 @@ nav i{
     color: white;
     font-family: Poppins,sans-serif;
     border-bottom: solid red 2px;
+    z-index: 2;
 }
+
+/* .mapboxgl-marker{
+    transition: all 1s;
+} */
 
 @media only screen and (max-width: 500px){
     .searchBox, .scheduleDiv{
@@ -269,6 +274,12 @@ nav i{
 
     .yesNo{
         font-size: 2rem;
+    }
+
+    .mapDiv{
+        top: 235px;
+        position: absolute;
+        height: calc(100vh - 235px);
     }
 
 }
