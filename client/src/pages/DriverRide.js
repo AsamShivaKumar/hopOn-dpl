@@ -154,7 +154,9 @@ export default function DriverRide(){
           const crds = rideObj.pickup[ind];
           const dist = new tt.LngLat(crds[0],crds[1]).distanceTo(new tt.LngLat(coords[0],coords[1]));
 
-          if(dist < 100){
+          console.log(dist,"distance");
+
+          if(dist < 3000){
             setUserName(rideObj.usernames[ind]);
             setLoc(rideObj.pickLoc[ind]);
             setOtpDiv(true);
@@ -200,7 +202,9 @@ export default function DriverRide(){
       }
 
       function verifyOtp(){
-        
+          const otp = otpVal;
+          console.log("otp entered-", otp);
+          
       }
 
     return (

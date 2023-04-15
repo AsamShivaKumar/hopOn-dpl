@@ -15,7 +15,7 @@ const io = require('socket.io')(server,{
     }
 });
 
-mongoose.connect('mongodb://localhost:27017/hopOnDB');
+mongoose.connect("mongodb+srv://ask:" + process.env.ATLAS_PASS + "@cluster0.pi81t.mongodb.net/hopOnDB");
 
 app.use(exp.json());
 app.use(exp.urlencoded({extended: true}));
@@ -261,7 +261,22 @@ io.on("connection", socket => {
             }
         });
     });
+
 });
+
+
+app.post('verify-otp', authenticate, (req,res) => {
+    const {ride_id,user_name} = req.body;
+    const driver = req.user._doc;
+
+    if(!driver) res.send({success: false});
+    else{
+        Ride.findOne({_id: ride_id}, (err,rideObj) => {
+            if(err) req.send({success: false});
+            else req.send({success: true});
+        })
+    }
+})
 
 app.post("/continuousbooking", (req, res) => {
     const username = req.body.username;

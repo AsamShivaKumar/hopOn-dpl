@@ -328,8 +328,6 @@ export default function Home(){
       socket.emit('shared-ride-req', reqObj);
       socket.on(`shared-ride-res-${user.username}`, (newRide) => {
         setRideShareId(newRide._id);
-        // `shared-ride-res-${user.username} ${sh_ride_id}-shared-ride-accepted
-        // ${sh_ride_id}-shared-ride-accepted
         console.log(`${newRide._id}-shared-ride-accepted`)
         socket.on(`${newRide._id}-shared-ride-accepted`, (rideOb) => {
           console.log("ride accepted!!");
