@@ -45,6 +45,8 @@ export default function Home(){
     const [cookies, setCookies] = useCookies();
     // const [driverCoords,setDriverCoords] = useState({});
     const [socket,setSocket] = useState(null);
+    const [rideShare,setRideShare] = useState(false);
+    const [rideShareId,setRideShareId] = useState('');
 
     const token = cookies.jwtToken;
     const user = cookies.userDetails;
@@ -105,7 +107,7 @@ export default function Home(){
             marker.getElement().src = "car_top_view.png";
             marker.getElement().width = 50;
             marker.addTo(map);
-            console.log("here!");
+            // console.log("here!");
             if(coords.heading) marker.getElement().style.transform = `rotate(${coords.heading}deg)`;
             const driver_crd = {
               coords: [coords.longitude,coords.latitude],
@@ -314,8 +316,27 @@ export default function Home(){
       else if(evt.target.value === 'Book Now') rideShareDiv.current.style.transform = "translateY(240px)";
       else{
         // req for ride share
+        rideShareFunc();
         return;
       }
+    }
+
+    function rideShareFunc(){
+
+      const otp = Math.round(Math.random()*(10000 - 999)) + 1000;
+      const reqObj = {locs: locs,otp: otp,token: token,location: userLocation, time: travelTime, dist: dist, pois: [pickLoc,dropLoc]};
+      socket.emit('shared-ride-req', reqObj);
+      socket.on(`shared-ride-res-${user.username}`, (newRide) => {
+        setRideShareId(newRide._id);
+        // `shared-ride-res-${user.username} ${sh_ride_id}-shared-ride-accepted
+        // ${sh_ride_id}-shared-ride-accepted
+        console.log(`${newRide._id}-shared-ride-accepted`)
+        socket.on(`${newRide._id}-shared-ride-accepted`, (rideOb) => {
+          console.log("ride accepted!!");
+          navigate(`ride/${rideOb._id}`);
+        });
+        setRideShare(true);
+      });
     }
 
     function bookNow(sharing){
@@ -323,9 +344,6 @@ export default function Home(){
       else sharing = 1
 
       const otp = Math.round(Math.random()*(10000 - 999)) + 1000;
-      // request to server with {locs,otp,username,location} - use socket ==> at server, invoke an event to all drivers in that location
-      // ==> at driver side, receive th event and display the request in the request bar
-      // if a driver approves a ride, trigger evt to server ==> event on this page ==> ride starts after otp verification
       const reqObj = {locs: locs,otp: otp,token: token,location: userLocation, time: travelTime, dist: dist, pois: [pickLoc,dropLoc], sharing: sharing};
       socket.emit("ride-request",reqObj);
       socket.on(`ride-res-${user.username}`, (rideObj) => {
@@ -398,6 +416,12 @@ export default function Home(){
                    <i className="fi fi-sr-badge-check" onClick={() => bookNow(true)}></i>
                 </div>
              </div>
+             {rideShare && <div className='ride-wait-div'>
+                     <figure>
+                        <img className="loadingGif" src = '/dring.gif'/>
+                        <figcaption> Searching for drivers...</figcaption>
+                     </figure>
+             </div>}
              { msg !== "" && <div className='msgDiv'>{msg}</div> }
              {rideList.length > 0 && <RideList rides = {rideList} />}
         </div>

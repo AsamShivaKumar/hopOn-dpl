@@ -83,7 +83,6 @@ function DriverHome() {
         type: 'ADD',
         item: rideDetails
       })
-      console.log(requestBasket,"reqBas");
     });
 
   },[onDuty]);
@@ -193,7 +192,6 @@ function DriverHome() {
                         requestBasket.map(ret_req_card)
                       }
                 </div>
-                {/* <div ref={mapContainer} className="mapContainer"></div> */}
                 </>)
                 }
 

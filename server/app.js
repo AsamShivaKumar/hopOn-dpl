@@ -107,8 +107,23 @@ const rideSchema = new mongoose.Schema({
     travelTime: [Number],
     dist: [Number],
     driver: String,
-    sharing: {type: Number, default: 0}
+    sharing: {type: Number, default: 0},
+    mobile: String,
+    reg_no: String
 });
+
+const sharedRideSchema = new mongoose.Schema({
+    username: String,
+    pickup: [Number],
+    drop: [Number],
+    pickLoc: String,
+    dropLoc: String,
+    otp: Number,
+    location: String,
+    travelTime: Number,
+    dist: Number,
+    driver: String
+})
 
 const continuousBookingSchema = new mongoose.Schema({
     username: String,
@@ -122,12 +137,40 @@ const ScheduledRide = new mongoose.model("ScheduledRide", scheduledRideSchema);
 const Rider = new mongoose.model("Rider", riderSchema);
 const Ride = new mongoose.model("Ride", rideSchema);
 const ContBooking = new mongoose.model("ContBooking", continuousBookingSchema);
+const SharedRide = new mongoose.model("SharedRide", sharedRideSchema);
 
 io.on("connection", socket => {
     
     socket.on("driver-coords", (user_name,location,coords) => {
         io.emit(`rider-${location}`,user_name,location,coords);
     });
+
+    socket.on('shared-ride-req', (req) => {
+        const {locs, otp, token, location, time, dist, pois} = req;
+        jwt.verify(token, process.env.JWT_SECRET_KEY, function(err,user){
+            if(err){
+                // can emit an event regarding failure of ride creation
+                console.log("Authorization failed during creation of ride object!");
+            }else{
+                user = user._doc;
+                const newRide = new SharedRide({
+                    username: user.username,
+                    pickup: locs[0],
+                    drop: locs[1],
+                    otp: otp,
+                    location: location,
+                    travelTime: time,
+                    dist: dist,
+                    pickLoc: pois[0],
+                    dropLoc: pois[1]
+                });
+                
+                newRide.save();
+                io.emit('shared-ride-request', newRide._id, user.username, locs, pois, time, dist);
+                io.emit(`shared-ride-res-${user.username}`, newRide);
+            }
+        });
+    })
 
     socket.on("ride-request", (req) => {
         const {locs, otp, token, location, time, dist, pois, sharing} = req;
@@ -149,7 +192,7 @@ io.on("connection", socket => {
                     dropLoc: [pois[1]],
                     sharing: sharing
                 });
-                // console.log(newRide._id,"id");
+                
                 newRide.save();
                 io.emit('ride-request', newRide._id, user.username, locs, pois, time, dist);
                 io.emit(`ride-res-${user.username}`, newRide);
@@ -159,6 +202,41 @@ io.on("connection", socket => {
 
     socket.on(`get-driver-coords`, (location) => {
         io.emit(`send-coords-${location}`,{});
+    });
+
+    socket.on("accept-shared-ride", (sh_ride_id,ride_id,token) => {
+        jwt.verify(token, process.env.JWT_SECRET_KEY, (err,user) => {
+            if(err) console.log(err);
+            else{
+                user = user._doc;
+                console.log("here!");
+                SharedRide.findOne({_id: sh_ride_id}, (err,sh_ride) => {
+                    if(err) io.emit(`${user.username}-ridereq-response`, false);
+                    else{
+                        if(!sh_ride.driver){
+                            sh_ride.driver = user.username;
+
+                            Ride.findOne({_id: ride_id}, (err,ride) => {
+                                if(err) console.log(err);
+                                ride.usernames.push(sh_ride.username);
+                                ride.pickup.push(sh_ride.pickup)
+                                ride.drop.push(sh_ride.drop)
+                                ride.pickLoc.push(sh_ride.pickLoc)
+                                ride.dropLoc.push(sh_ride.dropLoc)
+                                ride.otp.push(sh_ride.otp)
+                                ride.travelTime.push(sh_ride.travelTime)
+                                ride.dist.push(sh_ride.dist)
+                                ride.save();
+                                // console.log("RideObj",ride);
+                                io.emit(`${user.username}-shared-ridereq-response`, true, ride);
+                                // console.log(`${sh_ride_id}-shared-ride-accepted`);
+                                io.emit(`${sh_ride_id}-shared-ride-accepted`, ride);
+                            });                            
+                        }else socket.emit(`${user.username}-ridereq-response`, false)
+                    }
+                })
+            }
+        });
     });
 
     socket.on('accept-ride',(ride_id,token) => {
@@ -174,9 +252,8 @@ io.on("connection", socket => {
                             ride.mobile = user.mobile;
                             ride.reg_no = user.reg_no;
                             ride.save();
-                            socket.emit(`${user.username}-ridereq-response`, true)
-                            console.log(`${ride_id}-accepted`);
-                            socket.emit(`${ride_id}-accepted`, user);
+                            io.emit(`${user.username}-ridereq-response`, true)
+                            io.emit(`${ride_id}-accepted`, user);
                             
                         }else socket.emit(`${user.username}-ridereq-response`, false)
                     }
@@ -184,9 +261,6 @@ io.on("connection", socket => {
             }
         });
     });
-
-    // socket.on('*/accept', )
-
 });
 
 app.post("/continuousbooking", (req, res) => {
@@ -204,7 +278,7 @@ app.post("/continuousbooking", (req, res) => {
             if (endDt >= strtDt){
                flag = 1; // true
             }
-            console.log(flag);
+            // console.log(flag);
             if(flag === 1){
                 const weekdaysStr = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                 const weekdays = req.body.weekdays;
@@ -247,7 +321,6 @@ app.post("/verify-ride-driver", authenticate ,(req,res) => {
     const ride_id = req.body.ride_id;
 
     Ride.findOne({_id: ride_id}, (err,ride) => {
-        console.log(err,ride);
         if(err || !ride) res.send({verified: false});
         else if(ride.driver === driver.username) res.send({verified: true, rideObj: ride});
         else res.send({verified: false});
@@ -259,7 +332,6 @@ app.post("/verify-ride-user", authenticate, (req,res) => {
     const ride_id = req.body.ride_id;
 
     Ride.findOne({_id: ride_id}, (err,ride) => {
-        console.log(ride.usernames.indexOf(user.username),"index")
         if(err || !ride) res.send({verified: false});
         else if(ride.usernames.indexOf(user.username) >= 0) res.send({verified: true, rideObj: ride});
         else res.send({verified: false});
@@ -376,7 +448,7 @@ app.post("/verificationCode", authenticate, function(req, res){
             Rider.findOne({username: name},(err,rider) => {
                 if(err) console.log(err)
                 else{
-                    console.log(rider);
+                    // console.log(rider);
                     rider.emailVerified = true;
                     rider.save();
                     res.send({success: true, user: jwt.sign({name: rider.name, username: rider.username}, process.env.JWT_SECRET_KEY)});

@@ -24,9 +24,7 @@ export default function reducer(state, action) {
             };
         case 'REJECT':
             let currentRequests = [...state.requestBasket];
-            console.log(currentRequests)
             const index = state.requestBasket.findIndex((basketItem) => basketItem.ride_id===action.item.ride_id)
-            console.log(index)
             if(index>=0){
                 currentRequests.splice(index,1)
             }else{

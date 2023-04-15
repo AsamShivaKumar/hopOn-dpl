@@ -36,8 +36,7 @@ function Verification(){
     const [scale,setScale] = useState("upScale");
     const [doc,setDoc] = useState("Profile Photo");
     const [insrt,setInsrt] = useState(instructions[0]);
-    const [url,setUrl] = useState("profile.jpg");
-    const [image,setImage] = useState(null);    
+    const [url,setUrl] = useState("profile.jpg"); 
     
     useEffect(() => {
         

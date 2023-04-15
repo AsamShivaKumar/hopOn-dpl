@@ -1,13 +1,18 @@
 import {useEffect, useState, useRef} from 'react';
 import { useNavigate, useParams, Link} from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import { useStateValue } from '../StateProvider'
+
+import {io} from "socket.io-client";
 
 import tt from '@tomtom-international/web-sdk-maps';
 import ttServices from "@tomtom-international/web-sdk-services";
 
+import RequestCard from "../components/RequestCard"
 import axios from 'axios';
 
 export default function DriverRide(){
+    const [{requestBasket}, dispatch] = useStateValue();
     const mapContainer = useRef(null);
     let {rideId} = useParams();
     const navigate = useNavigate();
@@ -18,7 +23,16 @@ export default function DriverRide(){
     const [mapZoom, setMapZoom] = useState(16);
     const apiKey = "z0vcTRaQzJbXUlO6Obha1DR3tMJQFhdT";
     const [coords,setCoords] = useState([]);
+    const [sharing, setSharing] = useState(false);
+    const [socket,setSocket] = useState(null);
+    const [pickups,setPickups] = useState([]);
+    const [otpDiv,setOtpDiv] = useState(false);
+    const [otpVal,setOtpVal] = useState("");
 
+    const [username,setUserName] = useState("username");
+    const [loc,setLoc] = useState("location");
+
+    const user = cookies.userDetails;
 
     useEffect(() => {
 
@@ -31,8 +45,12 @@ export default function DriverRide(){
             res = res.data;
             if(!res.verified) navigate("/drive");
             setRideObj(res.rideObj);
+            if(res.rideObj.sharing === 0) setSharing(true);
+            else setSharing(false);
 
-            console.log(res.rideObj,"rideObj");
+            setPickups(res.rideObj.pickup.map((pickupCrd, ind) => ind));
+
+            setSocket(io("http://localhost:4000"));
 
             navigator.geolocation.getCurrentPosition(function(position) {
                 const m = tt.map({
@@ -43,17 +61,12 @@ export default function DriverRide(){
                 });
                 setCoords([position.coords.longitude, position.coords.latitude]);
                 setMap(m);
-
-                new tt.Marker().setLngLat(res.rideObj.pickup[0]).addTo(m);
-                new tt.Marker().setLngLat(res.rideObj.drop[0]).addTo(m);
-
-                // m.flyTo({center: res.rideObj.pickup});
             });
         })
     },[]);
 
     useEffect(() => {
-        if(!map) return;
+        if(!map || !rideObj) return;
 
         const marker = new tt.Marker({
             element: new Image()
@@ -61,10 +74,62 @@ export default function DriverRide(){
         marker.getElement().src = "/car_top_view.png";
         marker.getElement().width = 50;
         marker.addTo(map);
-        createRoute(coords, rideObj.pickup[0]);
-    },[map]);
 
-    function displayRoute(geoJSON){
+        for(var i = 0; i < rideObj.pickup.length; i++){
+          new tt.Marker().setLngLat(rideObj.pickup[i])
+          .setPopup(new tt.Popup({offset: 30}).setHTML(rideObj.pickLoc[i]))
+          .addTo(map);
+
+          new tt.Marker().setLngLat(rideObj.drop[i])
+          .setPopup(new tt.Popup({offset: 30}).setHTML(rideObj.dropLoc[i]))
+          .addTo(map);
+
+        }
+
+        // createRoute(coords, rideObj.pickup[0]);
+
+        navigator.geolocation.watchPosition(pos => {
+          const {latitude,longitude,heading} = pos.coords;
+          marker.setLngLat([longitude,latitude]);
+          setCoords([longitude,latitude]);
+          const angle = heading - 90;
+          if(heading) marker.getElement().style.transform = `rotate(${angle}deg)`;
+          
+          findNearPickup([longitude,latitude]);
+        })
+
+    },[map,rideObj]);
+
+    useEffect(() => {
+
+      if(!sharing || !socket) return;
+      socket.on('shared-ride-request', (ride_id, username, locs, pois, time, dist) => {
+        const rideDetails = {
+          ride_id: ride_id,
+          username: username,
+          locs: locs,
+          pois: pois,
+          distance: dist
+        }
+        setCookies("rideDetails", rideDetails, {path : "/"})
+        dispatch({
+          type: 'ADD',
+          item: rideDetails
+        })
+      });
+
+    },[sharing,socket])
+
+
+    useEffect(() => {
+      // console.log("prev", rideObj,coords);
+      if(!rideObj || coords.length === 0) return;
+      // console.log(rideObj.pickup,rideObj.drop);
+      const locations = [coords].concat(rideObj.pickup).concat(rideObj.drop);
+      createRoute(locations);
+    },[rideObj,coords]);
+
+    function displayRoute(geoJSON,instructions){
         const layer = map.getLayer('route');
         if(layer !== undefined){
           map.getSource('route').setData(geoJSON);
@@ -81,24 +146,61 @@ export default function DriverRide(){
               'line-width': 3
             }
           });
-        //   setTimeout(() => map.flyTo({center: pickMarker.getLngLat()}),1000); 
         }
       }
+
+      function findNearPickup(coords){
+         pickups.forEach(ind => {
+          const crds = rideObj.pickup[ind];
+          const dist = new tt.LngLat(crds[0],crds[1]).distanceTo(new tt.LngLat(coords[0],coords[1]));
+
+          if(dist < 100){
+            setUserName(rideObj.usernames[ind]);
+            setLoc(rideObj.pickLoc[ind]);
+            setOtpDiv(true);
+          }
+         })
+      }
   
-      function createRoute(pickLoc,dropLoc){
-        // if(pickMarker === null || dropMarker === null) return;
-        const coords = [pickLoc,dropLoc];
-        console.log(coords,"coords");
+      function createRoute(locations){
         var routeOptions = {
           key: apiKey,
-          locations: coords,
-          travelMode: 'car'
+          locations: locations,
+          travelMode: 'car',
+          instructionsType: "text"
         }
         ttServices.services.calculateRoute(routeOptions)
         .then(res => {
           const geoJson = res.toGeoJson();
-          displayRoute(geoJson);
+          const instructions = geoJson.features[0].properties.guidance.instructions;
+          displayRoute(geoJson,instructions);
         })
+      }
+
+      function acceptRide(sh_ride_id){
+        // "accept-shared-ride", (sh_ride_id,ride_id,token)
+        socket.emit("accept-shared-ride", sh_ride_id,rideId,token);
+        socket.on(`${user.username}-shared-ridereq-response`, (res,updRide) => {
+          setRideObj(updRide);
+        })
+      }
+
+      function ret_req_card(props){
+        // const dist = distance(props.locs[0][0], props.locs[0][1], props.locs[1][0], props.locs[1][1], "K")
+        return (
+              <RequestCard
+                  ride_id={props.ride_id}
+                  username={props.username}
+                  pick_up={props.pois[0]}
+                  drop={props.pois[1]}
+                  distance={props.distance}
+                  func={acceptRide}
+              />
+        )
+      }
+
+      function verifyOtp(){
+        
       }
 
     return (
@@ -111,6 +213,21 @@ export default function DriverRide(){
                     <Link><i className="fi fi-sr-user" title="Profile"></i></Link>
                 </div>
             </nav>
+            { (sharing && requestBasket.length !== 0) && (<><div className='riderequests'>
+                      {
+                        requestBasket.map(ret_req_card)
+                      }
+                </div>
+                </>)
+                }
+            {otpDiv && <div className='otpDiv'>
+                            <div>
+                              <p>{username}</p>
+                              <p>{loc}</p>
+                            </div>
+                            <input className='otp' type="text" value = {otpVal} onChange = { (evt) => setOtpVal(evt.target.value)} placeholder='Enter OTP'/>
+                            <button onClick={verifyOtp}>Submit</button>
+                       </div>}
             <div ref={mapContainer} className="mapDiv"></div>
         </div>
     )
