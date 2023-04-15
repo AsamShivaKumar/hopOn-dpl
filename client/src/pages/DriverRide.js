@@ -50,7 +50,7 @@ export default function DriverRide(){
 
             setPickups(res.rideObj.pickup.map((pickupCrd, ind) => ind));
 
-            setSocket(io("http://localhost:4000"));
+            setSocket(io("https://hopnon-server.onrender.com"));
 
             navigator.geolocation.getCurrentPosition(function(position) {
                 const m = tt.map({

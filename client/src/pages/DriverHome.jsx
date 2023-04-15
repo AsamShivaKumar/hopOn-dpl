@@ -59,7 +59,7 @@ function DriverHome() {
   useEffect(() => {
     if(!onDuty) return;
 
-    const socket = io("http://localhost:4000");
+    const socket = io("https://hopnon-server.onrender.com");
     
     navigator.geolocation.watchPosition((pos => {
         const {heading, latitude, longitude} = pos.coords;

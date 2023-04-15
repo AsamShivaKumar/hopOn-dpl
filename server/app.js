@@ -9,7 +9,7 @@ const nodemailer = require('nodemailer');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server,{
     cors:{
-        origin: 'http://localhost:3000',
+        origin: 'https://hopon-client.onrender.com',
         credentials: true,
         methods: ["GET","POST"]
     }

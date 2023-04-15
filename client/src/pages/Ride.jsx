@@ -64,7 +64,7 @@ export default function Ride(){
     useEffect(() => {
       if(rideObj === {}) return;
 
-      const socket = io("http://localhost:4000");
+      const socket = io("https://hopnon-server.onrender.com");
 
         navigator.geolocation.getCurrentPosition(function(position) {
             setMapLat(position.coords.latitude);

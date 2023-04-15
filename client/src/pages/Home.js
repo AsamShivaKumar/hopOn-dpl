@@ -66,7 +66,7 @@ export default function Home(){
           setMap(m);
       });
 
-      setSocket(io("http://localhost:4000"));
+      setSocket(io("https://hopnon-server.onrender.com"));
       // setCookies('driverCoords', stringify({}));
 
       return () => {if(map != null) map.remove()};
