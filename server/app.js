@@ -736,6 +736,11 @@ app.post("/login",async function(req, res){
     }
 });
 
-server.listen(4000, () => {
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 4000;
+}
+
+server.listen(port, () => {
     console.log("Server started on port 4000")
 });
