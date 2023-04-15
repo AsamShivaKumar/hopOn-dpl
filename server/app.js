@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const cors = require("cors");
 
 const server = require('http').createServer(app);
 const io = require('socket.io')(server,{
@@ -18,6 +19,7 @@ const io = require('socket.io')(server,{
 mongoose.connect("mongodb+srv://ask:" + process.env.ATLAS_PASS + "@cluster0.pi81t.mongodb.net/hopOnDB");
 
 app.use(exp.json());
+app.use(cors());
 app.use(exp.urlencoded({extended: true}));
 
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
