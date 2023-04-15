@@ -479,6 +479,7 @@ app.post("/verificationCode", authenticate, function(req, res){
 
 app.post('/register', async function(req, res){
     const customerType = req.body.customerType;
+    console.log("register route", customerType);
     if(customerType === "Driver"){
         Driver.findOne({username:req.body.username},async function(err, driver){
             if(err){
