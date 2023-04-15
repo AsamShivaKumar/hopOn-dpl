@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {BrowserRouter,Routes,Route,Link} from 'react-router-dom';
+import {BrowserRouter,Routes,Route, HashRouter} from 'react-router-dom';
 import Verification from './pages/Verfication';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -16,7 +16,7 @@ import reducer, { initialState } from './reducer';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <StateProvider initialState={initialState} reducer={reducer}>
-    <BrowserRouter>
+    <HashRouter>
         <Routes>
             <Route path = "/" element = {<Home />} />
             <Route path = "/register" element = {<Register/>} />
@@ -33,6 +33,6 @@ root.render(
             {/* </Route> */}
             <Route path = "/*" element = {<h1>NOT FOUND</h1>} />
         </Routes>
-    </BrowserRouter>
+    </HashRouter>
     </StateProvider>
 );
