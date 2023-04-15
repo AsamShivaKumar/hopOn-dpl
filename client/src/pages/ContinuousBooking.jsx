@@ -61,7 +61,7 @@ function ContinuousBooking() {
             weekdays: weekdays
           }
           setCookies("bookingDetails", details, {path : "/"})
-          await axios.post('/continuousbooking', details)
+          await axios.post('https://hopnon-server.onrender.com/continuousbooking', details)
         .then(response => {
 
         })

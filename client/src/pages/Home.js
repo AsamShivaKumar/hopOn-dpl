@@ -275,7 +275,7 @@ export default function Home(){
 
       // axios req to server to schedule the ride
       const reqObj = {locs: locs,location: userLocation, travelTime: travelTime, dist: dist, pois: [pickLoc,dropLoc], date: date, time: time};
-      axios.post("/schedule-ride",reqObj,{
+      axios.post("https://hopnon-server.onrender.com/schedule-ride",reqObj,{
         headers: {
           'Authorization': `Basic ${token}` 
         }

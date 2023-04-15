@@ -25,7 +25,7 @@ function Login() {
   },[]);
 
   const handleRider = async (e) => {
-      await axios.post('/login', {
+      await axios.post('https://hopnon-server.onrender.com/login', {
         usernameoremail: userNameOrEmail.current.value,
         password: password.current.value,
         customerType: "Rider"
@@ -47,7 +47,7 @@ function Login() {
   }
 
   const handleDriver = async (e) => {
-      await axios.post('/login', {
+      await axios.post('https://hopnon-server.onrender.com/login', {
       usernameoremail: userNameOrEmail.current.value,
       password: password.current.value,
       customerType: "Driver"

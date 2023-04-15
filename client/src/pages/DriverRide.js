@@ -37,7 +37,7 @@ export default function DriverRide(){
     useEffect(() => {
 
         if(!token) navigate("/drive");
-        axios.post("/verify-ride-driver",{ride_id: rideId},{
+        axios.post("https://hopnon-server.onrender.com/verify-ride-driver",{ride_id: rideId},{
             headers: {
               'Authorization': `Basic ${token}` 
             }

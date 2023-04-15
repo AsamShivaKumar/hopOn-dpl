@@ -40,7 +40,7 @@ function Verification(){
     
     useEffect(() => {
         
-        axios.post("/fetch-driver-details", {
+        axios.post("https://hopnon-server.onrender.com/fetch-driver-details", {
             username: name
         })
         .then(res => {
@@ -85,7 +85,7 @@ function Verification(){
 
         reader.onload = () => {
             // uploading file
-            axios.post("/upload_file",{
+            axios.post("https://hopnon-server.onrender.com/upload_file",{
                 username: name,
                 image: reader.result,
                 docInd: docs.indexOf(doc)

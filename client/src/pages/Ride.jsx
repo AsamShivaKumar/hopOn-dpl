@@ -33,7 +33,7 @@ export default function Ride(){
 
     useEffect(() => {
         
-      axios.post("/verify-ride-user",{ride_id: rideId},{
+      axios.post("https://hopnon-server.onrender.com/verify-ride-user",{ride_id: rideId},{
         headers: {
           'Authorization': `Basic ${token}`
         }

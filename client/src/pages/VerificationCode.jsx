@@ -15,7 +15,7 @@ function VerificationCode() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        axios.post('/verificationCode', {
+        axios.post('https://hopnon-server.onrender.com/verificationCode', {
           customerType: cookies.userDetails.customerType,
           enteredCode: enteredCode.current.value
         },{
