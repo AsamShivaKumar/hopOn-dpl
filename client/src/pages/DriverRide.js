@@ -91,9 +91,12 @@ export default function DriverRide(){
         navigator.geolocation.watchPosition(pos => {
           const {latitude,longitude,heading} = pos.coords;
           marker.setLngLat([longitude,latitude]);
-          setCoords([longitude,latitude]);
+      
           const angle = heading - 90;
-          if(heading) marker.getElement().style.transform = `rotate(${angle}deg)`;
+          if(heading){
+            marker.getElement().style.transform = `rotate(${angle}deg)`;
+            setCoords([longitude,latitude]);
+          }
           
           findNearPickup([longitude,latitude]);
         })
