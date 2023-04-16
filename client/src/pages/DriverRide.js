@@ -169,7 +169,7 @@ export default function DriverRide(){
 
           console.log(dist,"distance");
 
-          if(dist < 100){
+          if(dist <= 500){
             setUserName(rideObj.usernames[ind]);
             setLoc(rideObj.pickLoc[ind]);
             setOtpDiv(true);
