@@ -58,19 +58,18 @@ function DriverHome() {
 
   useEffect(() => {
     if(!onDuty) return;
-
     setSocket(io.connect("https://hopnon-server.onrender.com"));
-    
-    navigator.geolocation.watchPosition((pos => {
-        const {heading, latitude, longitude} = pos.coords;
-        reverseGeocode(longitude,latitude,heading);
-        setCoords([longitude,latitude]);
-    }))
 
   },[onDuty]);
 
   useEffect(() => {
     if(!socket) return;
+
+    navigator.geolocation.watchPosition((pos => {
+      const {heading, latitude, longitude} = pos.coords;
+      reverseGeocode(longitude,latitude,heading);
+      setCoords([longitude,latitude]);
+    }))
 
     socket.on('ride-request', (ride_id, username, locs, pois, time, dist) => {
       console.log("ride details-",ride_id, username, locs, pois, time, dist);
