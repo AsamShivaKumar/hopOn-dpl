@@ -68,7 +68,7 @@ export default function DriverRide(){
     useEffect(() => {
         if(!map || !rideObj) return;
 
-        const marker = new tt.Marker({
+        let marker = new tt.Marker({
             element: new Image()
         }).setLngLat(coords);
         marker.getElement().src = "/car_top_view.png";
@@ -91,12 +91,18 @@ export default function DriverRide(){
         navigator.geolocation.watchPosition(pos => {
           const {latitude,longitude,heading} = pos.coords;
           marker.setLngLat([longitude,latitude]);
-      
-          const angle = heading - 90;
+          setCoords([longitude,latitude]);
+
           if(heading){
-            marker.getElement().style.transform = `rotate(${angle}deg)`;
-            marker.getElement().style.transformOrigin = 'center';
-            setCoords([longitude,latitude]);
+            const angle = heading - 90;
+            marker.remove();
+            marker = new tt.Marker({
+              element: new Image(),
+              rotation: angle
+            }).setLngLat(coords);
+            marker.getElement().src = "/car_top_view.png";
+            marker.getElement().width = 50;
+            marker.addTo(map);
           }
           
           findNearPickup([longitude,latitude]);
