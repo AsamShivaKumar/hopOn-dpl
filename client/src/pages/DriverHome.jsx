@@ -118,6 +118,8 @@ function DriverHome() {
   }
 
   function acceptRide(ride_id){
+    console.log("accpeting ride!!!",socket);
+
     socket.emit('accept-ride', ride_id,token);
     
     socket.on(`${driverDetails.username}-ridereq-response`, (res) => {
