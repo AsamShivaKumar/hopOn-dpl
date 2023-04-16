@@ -28,6 +28,8 @@ export default function Ride(){
       reg_no: "number"
     });
     const [ind,setInd] = useState(0);
+    const [driverMarker,setDriverMarker] = useState(null);
+    const [socket,setSocket] = useState(null);
 
     const token = cookies.jwtToken;
 
@@ -60,7 +62,7 @@ export default function Ride(){
     useEffect(() => {
       if(!rideObj.pickup) return;
       
-      const socket = io("https://hopnon-server.onrender.com");
+      setSocket(io("https://hopnon-server.onrender.com"));
 
         navigator.geolocation.getCurrentPosition(function(position) {
             setMapLat(position.coords.latitude);
@@ -76,15 +78,21 @@ export default function Ride(){
             new tt.Marker().setLngLat(rideObj.pickup[ind]).addTo(m);
             new tt.Marker().setLngLat(rideObj.drop[ind]).addTo(m);
 
-            socket.on(`${rideId}-accepted`, (driver) => {
-              setDriverObj(driver);              
-              setDriverAss(true);
-            })
-
             m.flyTo({center: rideObj.pickup[ind]});
       });
 
-    },[rideObj])
+    },[rideObj]);
+
+
+    useEffect(() => {
+      if(!socket) return;
+
+      socket.on(`${rideId}-accepted`, (driver) => {
+        setDriverObj(driver);              
+        setDriverAss(true);
+      })
+
+    },[socket]);
 
     useEffect(() => {
         if(map === null || !rideObj.pickup) return;
@@ -102,6 +110,35 @@ export default function Ride(){
         })
 
     },[map,rideObj]);
+
+    useEffect(() => {
+      if(!driverAss) return;
+
+      socket.on(`${rideId}-driver-coords`, (crds) => {
+        if(!driverMarker){
+          const m = new tt.Marker({
+            element: new Image()
+          }).setLngLat([crds.longitude,crds.latitude]);
+          m.getElement().src = "/car_top_view.png";
+          m.getElement().width = 50;
+          m.addTo(map);
+          setDriverMarker(m);
+        }else if(!crds.heading){
+          driverMarker.setLngLat([crds.longitude,crds.latitude]);
+        }else{
+          const m = new tt.Marker({
+            element: new Image(),
+            rotation: crds.heading - 90
+          }).setLngLat([crds.longitude,crds.latitude]);
+          m.getElement().src = "/car_top_view.png";
+          m.getElement().width = 50;
+          m.addTo(map);
+          driverMarker.remove();
+          setDriverMarker(m);
+        }
+      })
+
+    }, [driverAss]);
 
     function displayRoute(geoJSON){
 

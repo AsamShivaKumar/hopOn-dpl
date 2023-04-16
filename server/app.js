@@ -264,6 +264,11 @@ io.on("connection", socket => {
         });
     });
 
+    socket.on("driver-coords-ride", (rideId, coords) => {
+        // `${rideId}-driver-coords`, (crds) 
+        socket.emit(`${rideId}-driver-coords`, coords);
+    })
+
 
 });
 
@@ -279,7 +284,14 @@ app.post('/verify-otp', authenticate, (req,res) => {
             else{
                 const ind = rideObj.usernames.indexOf(user_name);
                 if(ind == -1) res.send({success: false});
-                else res.send({success: (rideObj.otp[ind] == Number(otp))});
+                else{
+                    if(rideObj.otp[ind] == Number(otp)){
+                        rideObj.pickup.splice(ind,1);
+                        rideObj.pickLoc.splice(ind,1);
+                        rideObj.save();
+                        res.send({success: true, rideObj: rideObj});
+                    }else res.send({success: false});
+                }
             }
         })
     }

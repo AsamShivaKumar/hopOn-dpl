@@ -96,6 +96,8 @@ export default function DriverRide(){
           marker.setLngLat([longitude,latitude]);
           setCoords([longitude,latitude]);
 
+          if(!socket) socket.emit("driver-coords-ride", rideId, pos.coords);
+
           if(heading){
             const angle = heading - 90;
             marker.remove();
@@ -233,12 +235,14 @@ export default function DriverRide(){
                 setOtpDiv(false);
                 setMsg("OTP verified!!");
                 setInterval(() => (setMsg("")), 6000);
+                setRideObj(res.rideObj);
             }else{
               setMsg("Enter a valid OTP!");
               setInterval(() => (setMsg("")), 6000);
             }
           })
       }
+
 
     return (
         <div className='mainContainer'>
