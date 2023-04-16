@@ -11,6 +11,8 @@ import ttServices from "@tomtom-international/web-sdk-services";
 import RequestCard from "../components/RequestCard"
 import axios from 'axios';
 
+import '../styles/driverRide.css';
+
 export default function DriverRide(){
     const [{requestBasket}, dispatch] = useStateValue();
     const mapContainer = useRef(null);
@@ -28,6 +30,7 @@ export default function DriverRide(){
     const [pickups,setPickups] = useState([]);
     const [otpDiv,setOtpDiv] = useState(false);
     const [otpVal,setOtpVal] = useState("");
+    const [msg,setMsg] = useState("");
 
     const [username,setUserName] = useState("username");
     const [loc,setLoc] = useState("location");
@@ -166,7 +169,7 @@ export default function DriverRide(){
 
           console.log(dist,"distance");
 
-          if(dist < 3000){
+          if(dist < 100){
             setUserName(rideObj.usernames[ind]);
             setLoc(rideObj.pickLoc[ind]);
             setOtpDiv(true);
@@ -214,7 +217,27 @@ export default function DriverRide(){
       function verifyOtp(){
           const otp = otpVal;
           console.log("otp entered-", otp);
-          
+          axios.post("https://hopnon-server.onrender.com/verify-otp", {
+            otp: otp,
+            user_name: username,
+            ride_id: rideId
+          },{
+            headers: {
+              'Authorization': `Basic ${token}`
+            }
+          }).then(res => {
+            res = res.data;
+            console.log("Response - ",res);
+
+            if(res.success){
+                setOtpDiv(false);
+                setMsg("OTP verified!!");
+                setInterval(() => (setMsg("")), 6000);
+            }else{
+              setMsg("Enter a valid OTP!");
+              setInterval(() => (setMsg("")), 6000);
+            }
+          })
       }
 
     return (
@@ -242,7 +265,8 @@ export default function DriverRide(){
                             <input className='otp' type="text" value = {otpVal} onChange = { (evt) => setOtpVal(evt.target.value)} placeholder='Enter OTP'/>
                             <button onClick={verifyOtp}>Submit</button>
                        </div>}
-            <div ref={mapContainer} className="mapDiv"></div>
+            { msg !== "" && <div className='msgDiv'>{msg}</div> }
+            <div ref={mapContainer} className="mapDivRide"></div>
         </div>
     )
 }

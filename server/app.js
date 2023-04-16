@@ -264,18 +264,23 @@ io.on("connection", socket => {
         });
     });
 
+
 });
 
 
 app.post('verify-otp', authenticate, (req,res) => {
-    const {ride_id,user_name} = req.body;
+    const {ride_id,user_name,otp} = req.body;
     const driver = req.user._doc;
 
     if(!driver) res.send({success: false});
     else{
         Ride.findOne({_id: ride_id}, (err,rideObj) => {
-            if(err) req.send({success: false});
-            else req.send({success: true});
+            if(err) res.send({success: false});
+            else{
+                const ind = rideObj.usernames.indexOf(user_name);
+                if(ind == -1) res.send({success: false});
+                else res.send({success: (rideObj.otp[ind] == otp)});
+            }
         })
     }
 })
