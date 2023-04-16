@@ -268,7 +268,7 @@ io.on("connection", socket => {
 });
 
 
-app.post('verify-otp', authenticate, (req,res) => {
+app.post('/verify-otp', authenticate, (req,res) => {
     const {ride_id,user_name,otp} = req.body;
     const driver = req.user._doc;
 
@@ -279,7 +279,7 @@ app.post('verify-otp', authenticate, (req,res) => {
             else{
                 const ind = rideObj.usernames.indexOf(user_name);
                 if(ind == -1) res.send({success: false});
-                else res.send({success: (rideObj.otp[ind] == otp)});
+                else res.send({success: (rideObj.otp[ind] == Number(otp))});
             }
         })
     }
