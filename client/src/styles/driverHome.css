@@ -195,3 +195,11 @@ input:checked + .slider:before {
   width: 100vw;
   height: calc(100vh - 50px);
 }
+
+@media only screen and (max-width: 500px){
+  .otpDiv{
+    width: 100vw;
+    top: 0;
+    left: 0;
+  }
+}
