@@ -95,6 +95,7 @@ export default function DriverRide(){
           const angle = heading - 90;
           if(heading){
             marker.getElement().style.transform = `rotate(${angle}deg)`;
+            marker.getElement().style.transformOrigin = 'center';
             setCoords([longitude,latitude]);
           }
           
