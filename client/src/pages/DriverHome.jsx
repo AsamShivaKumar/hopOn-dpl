@@ -30,8 +30,8 @@ function DriverHome() {
   const navigate = useNavigate();
   const driverDetails = cookies.userDetails;
   const token = cookies.jwtToken;
-  
-  const socket = io("http://localhost:4000");
+
+  const [socket,setSocket] = useState(null);
   
   // use useEffect and allow only the users who are drivers ************
   
@@ -59,15 +59,18 @@ function DriverHome() {
   useEffect(() => {
     if(!onDuty) return;
 
-    const socket = io.connect("https://hopnon-server.onrender.com");
+    setSocket(io.connect("https://hopnon-server.onrender.com"));
     
     navigator.geolocation.watchPosition((pos => {
         const {heading, latitude, longitude} = pos.coords;
         reverseGeocode(longitude,latitude,heading);
-        // marker.setLngLat([longitude,latitude]);
         setCoords([longitude,latitude]);
-        // map.flyTo({center: [longitude,latitude]});
     }))
+
+  },[onDuty]);
+
+  useEffect(() => {
+    if(!socket) return;
 
     socket.on('ride-request', (ride_id, username, locs, pois, time, dist) => {
       console.log("ride details-",ride_id, username, locs, pois, time, dist);
@@ -84,15 +87,14 @@ function DriverHome() {
         item: rideDetails
       })
     });
-
-  },[onDuty]);
+  },[socket]);
 
   useEffect(() => {
-    if(loc === "") return;
+    if(loc === "" || !socket) return;
     socket.on(`send-coords-${loc}`, () => {
       socket.emit("driver-coords", cookies.userDetails.username,loc,{latitude: coords[1],longitude:coords[0],heading:null})
     })
-  },[loc]);
+  },[loc,socket]);
 
   function reverseGeocode(longitude,latitude,heading){
     ttServices.services.reverseGeocode({
