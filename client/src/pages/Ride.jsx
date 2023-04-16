@@ -156,7 +156,7 @@ export default function Ride(){
                                    </div>
                                    <div>
                                       <p>OTP</p>
-                                      <p>{rideObj.otp[ind]}</p>
+                                      <p>{rideObj.otp? rideObj.otp[ind]:0}</p>
                                    </div>
                               </div>}
              </div>

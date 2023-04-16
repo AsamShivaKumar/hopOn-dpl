@@ -119,6 +119,7 @@ function DriverHome() {
 
   function acceptRide(ride_id){
     socket.emit('accept-ride', ride_id,token);
+    
     socket.on(`${driverDetails.username}-ridereq-response`, (res) => {
       if(res) navigate(`ride/${ride_id}`);
       else console.log("Ride has already been alloted to other driver!");
