@@ -87,7 +87,7 @@ export default function Ride(){
     },[rideObj])
 
     useEffect(() => {
-        if(map === null || rideObj === {}) return;
+        if(map === null || !rideObj.pickup) return;
 
         const coords = [rideObj.pickup[ind],rideObj.drop[ind]]
         var routeOptions = {
