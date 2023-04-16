@@ -44,13 +44,9 @@ export default function Ride(){
           setRideObj(res.rideObj);
           const i = res.rideObj.usernames.indexOf(cookies.userDetails.username);
           setInd(i);
-          console.log("here!");
-          console.log(res.rideObj,i);
-          // console.log(res.rideObj.pickup[i]);
 
           if(res.rideObj.driver){
             setDriverAss(true);
-            console.log("assigned!")
             setDriverObj({
               username: res.rideObj.driver,
               mobile: res.rideObj.mobile,
@@ -62,8 +58,8 @@ export default function Ride(){
     },[])
 
     useEffect(() => {
-      if(rideObj === {}) return;
-
+      if(!rideObj.pickup) return;
+      
       const socket = io("https://hopnon-server.onrender.com");
 
         navigator.geolocation.getCurrentPosition(function(position) {
@@ -77,16 +73,10 @@ export default function Ride(){
             });
             setMap(m);
 
-            console.log(ind)
-            console.log(rideObj.pickup[ind],"pickup");
-            console.log(rideObj.drop[ind],"drop");
-
             new tt.Marker().setLngLat(rideObj.pickup[ind]).addTo(m);
             new tt.Marker().setLngLat(rideObj.drop[ind]).addTo(m);
 
-            console.log(`${rideId}-accepted`);
             socket.on(`${rideId}-accepted`, (driver) => {
-              console.log("driverObj",driver);
               setDriverObj(driver);              
               setDriverAss(true);
             })
