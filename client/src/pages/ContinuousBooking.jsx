@@ -68,6 +68,7 @@ function ContinuousBooking() {
           setCookies("bookingDetails", details, {path : "/"})
           axios.post('https://hopnon-server.onrender.com/continuousbooking', details)
             .then(response => {
+                console.log(response);
                 navigate("/");
             })
             .catch(error => {

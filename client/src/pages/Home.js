@@ -396,7 +396,7 @@ export default function Home(){
                     <option value="cntBook">Cont. Booking</option>
                   </select>
                   {/* <button className="searchBtn" onClick={bookNow}>Book Now</button> */}
-                  <button className="searchBtn" onClick={openScheduleDiv}>Schedule Later</button>
+                  <button className="searchBtn" onClick={openScheduleDiv}>Schedule</button>
                 </div>
                 {suggestions.length !== 0 && <DropDown locations = {suggestions} handleClick={pointLocation}/>}
              </div>
