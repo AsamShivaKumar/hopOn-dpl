@@ -314,10 +314,13 @@ export default function Home(){
 
       if(evt.target.value === 'none') return;
       else if(evt.target.value === 'Book Now') rideShareDiv.current.style.transform = "translateY(240px)";
-      else{
+      else if(evt.target.value === 'Share Ride'){
         // req for ride share
         rideShareFunc();
         return;
+      }else{
+        setCookies('rideLoc', {locs: locs});
+        navigate("/contBooking");
       }
     }
 
@@ -390,6 +393,7 @@ export default function Home(){
                     <option value="none" selected disabled hidden>Select mode</option>
                     <option value="Book Now">Book Now</option>
                     <option value="Share Ride">Share Ride</option>
+                    <option value="cntBook">Continuos Booking</option>
                   </select>
                   {/* <button className="searchBtn" onClick={bookNow}>Book Now</button> */}
                   <button className="searchBtn" onClick={openScheduleDiv}>Schedule Later</button>

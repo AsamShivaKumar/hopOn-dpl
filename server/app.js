@@ -272,7 +272,6 @@ io.on("connection", socket => {
 
 });
 
-
 app.post('/verify-otp', authenticate, (req,res) => {
     const {ride_id,user_name,otp} = req.body;
     const driver = req.user._doc;
@@ -342,7 +341,8 @@ app.post("/continuousbooking", (req, res) => {
                 username: username,
                 fromdate: req.body.fromDate,
                 todate: req.body.toDate,
-                excludedates: dates
+                excludedates: dates,
+                locs: req.body.locs
             });
             newBooking.save();
         }

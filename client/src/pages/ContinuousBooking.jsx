@@ -1,6 +1,6 @@
-import React from 'react'
+import {useEffect} from 'react'
 import "../styles/continuousBooking.css"
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
 import { useState } from 'react'
 import axios from 'axios'
@@ -12,7 +12,7 @@ function ContinuousBooking() {
     const fromDate = useRef();
     const toDate = useRef();
     const optDate = useRef();
-    const [cookie, setCookies] = useCookies();
+    const [cookies, setCookies] = useCookies();
     var [dates, setDates] = useState([]);
     const [monday, setMonday] = useState(false);
     const [tuesday, setTuesday] = useState(false);
@@ -21,6 +21,10 @@ function ContinuousBooking() {
     const [friday, setFriday] = useState(false);
     const [saturday, setSaturday] = useState(false);
     const [sunday, setSunday] = useState(false);
+
+    const navigate = useNavigate();
+
+
     function mon(){
         setMonday(prev => !prev);
     }
@@ -58,12 +62,13 @@ function ContinuousBooking() {
             dates: dates,
             fromDate: fromDate.current.value,
             toDate: toDate.current.value,
-            weekdays: weekdays
+            weekdays: weekdays,
+            locs: locs
           }
           setCookies("bookingDetails", details, {path : "/"})
           await axios.post('https://hopnon-server.onrender.com/continuousbooking', details)
         .then(response => {
-
+            navigate("/");
         })
         .catch(error => {
           console.log(error);
@@ -73,6 +78,9 @@ function ContinuousBooking() {
         setDates( dates => [...dates, optDate.current.value])
     }
 
+    useEffect(() => {
+        if(!cookies.locs.rideLoc) navigate("/");
+    },[]);
 
 
   return (
