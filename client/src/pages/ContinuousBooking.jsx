@@ -58,12 +58,12 @@ function ContinuousBooking() {
         saturday && weekdays.push(6)
         sunday && weekdays.push(0)
         const details = {
-            username: cookie.userDetails.username,
+            username: cookies.userDetails.username,
             dates: dates,
             fromDate: fromDate.current.value,
             toDate: toDate.current.value,
             weekdays: weekdays,
-            locs: locs
+            locs: cookies.rideLoc.locs
           }
           setCookies("bookingDetails", details, {path : "/"})
           await axios.post('https://hopnon-server.onrender.com/continuousbooking', details)
@@ -79,7 +79,7 @@ function ContinuousBooking() {
     }
 
     useEffect(() => {
-        if(!cookies.locs.rideLoc) navigate("/");
+        if(!cookies.rideLoc) navigate("/");
     },[]);
 
 
