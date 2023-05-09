@@ -63,7 +63,8 @@ function Verification(){
             if(verified) navigate("/drive");
         });
 
-        if(cookies.userDetails.customerType !== "Driver") navigate("/");        
+        if(cookies.userDetails.customerType !== "Driver") navigate("/");    
+            // comment 
     },[]);
 
     function displayUploadDiv(evt){
