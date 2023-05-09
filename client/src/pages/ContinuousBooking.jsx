@@ -66,13 +66,13 @@ function ContinuousBooking() {
             locs: cookies.rideLoc.locs
           }
           setCookies("bookingDetails", details, {path : "/"})
-          await axios.post('https://hopnon-server.onrender.com/continuousbooking', details)
-        .then(response => {
-            navigate("/");
-        })
-        .catch(error => {
-          console.log(error);
-        });
+          axios.post('https://hopnon-server.onrender.com/continuousbooking', details)
+            .then(response => {
+                navigate("/");
+            })
+            .catch(error => {
+            console.log(error);
+            });
     }
     const addDate = async (e) => {
         setDates( dates => [...dates, optDate.current.value])
