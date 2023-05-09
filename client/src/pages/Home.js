@@ -393,7 +393,7 @@ export default function Home(){
                     <option value="none" selected disabled hidden>Select mode</option>
                     <option value="Book Now">Book Now</option>
                     <option value="Share Ride">Share Ride</option>
-                    <option value="cntBook">Continuos Booking</option>
+                    <option value="cntBook">Cont. Booking</option>
                   </select>
                   {/* <button className="searchBtn" onClick={bookNow}>Book Now</button> */}
                   <button className="searchBtn" onClick={openScheduleDiv}>Schedule Later</button>

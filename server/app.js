@@ -131,7 +131,8 @@ const continuousBookingSchema = new mongoose.Schema({
     username: String,
     fromdate: String,
     todate: String,
-    excludedates: Array
+    excludedates: Array,
+    locs: Array
 });
 
 const Driver = new mongoose.model("Driver", driverSchema);
