@@ -58,7 +58,7 @@ function Login() {
                 setCookies("userDetails",response.data, {path: "/"})
                 navigate("/verificationCode")
             }else{
-                navigate("/drive")
+                navigate("/verify")
             }
         }else{
           setmsg(response.data.msg)

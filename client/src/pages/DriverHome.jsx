@@ -34,6 +34,10 @@ function DriverHome() {
   const [socket,setSocket] = useState(null);
   
   // use useEffect and allow only the users who are drivers ************
+
+  useEffect(() => {
+    if(cookies.userDetails.customerType !== "Driver") navigate("/");
+  },[]);
   
   // useEffect(() => {
   //   if(trigger === false) return;

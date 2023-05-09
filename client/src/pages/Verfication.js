@@ -2,7 +2,7 @@
 
 import {useState,useEffect} from "react"
 import { useNavigate } from "react-router-dom";
-import { useCookies } from "react-cookie"
+import { useCookies } from "react-cookie";
 import axios from "axios";
 import FileUpload from "../components/FileUpload";
 import "../styles/verification.css"
@@ -48,17 +48,22 @@ function Verification(){
             const docStatus = driver.docs;
             const subDocs = [];
             const sDocs = [];
+
+            let verified = true;
             
             for(var i = 0; i < docStatus.length; i++){
                 if(docStatus[i] === 2 || docStatus[i] === 3) subDocs.push([docs[i],docStatus[i]]);
                 else sDocs.push([docs[i],docStatus[i]]);
+
+                if(docStatus[i] !== 0) verified = false;
+
             }
             setSubmitted(sDocs);
             setSubmit(subDocs);
+            if(verified) navigate("/drive");
         });
 
-        // redirect the driver to drive page once verification is done
-        // if(cookies.driver.verified == true) navigate("/drive");       
+        if(cookies.userDetails.customerType !== "Driver") navigate("/");       
     },[]);
 
     function displayUploadDiv(evt){
