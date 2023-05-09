@@ -112,7 +112,7 @@ export default function Ride(){
     },[map,rideObj]);
 
     useEffect(() => {
-      if(!driverAss) return;
+      if(!driverAss || !socket) return;
 
       socket.on(`${rideId}-driver-coords`, (crds) => {
         if(!driverMarker){
@@ -138,7 +138,7 @@ export default function Ride(){
         }
       })
 
-    }, [driverAss]);
+    }, [driverAss,socket]);
 
     function displayRoute(geoJSON){
 
