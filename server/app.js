@@ -280,8 +280,7 @@ cron.schedule('*/1 * * * *', () => {
     // adds schduled rides which are to be started in 5 minutes to rides collection
 
     const now = new Date();
-    
-    ScheduledRide.find({time: {$lte: new Date(now.getTime() + 5*60000)}}, (err,rides) => {
+    ScheduledRide.find({date: {$lte: new Date(now.getTime() + 5*60000)}}, (err,rides) => {
         if(err) console.log("Error in cron job", err);
         else{
             rides.forEach(ride => {
