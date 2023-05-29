@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const cors = require("cors");
 
+const cron = require('node-cron');
+
 const server = require('http').createServer(app);
 const io = require('socket.io')(server,{
     cors:{
@@ -269,6 +271,37 @@ io.on("connection", socket => {
         // `${rideId}-driver-coords`, (crds) 
         socket.emit(`${rideId}-driver-coords`, coords);
     })
+
+
+});
+
+cron.schedule('*/1 * * * *', () => {
+    // runs every minute 
+    // adds schduled rides which are to be started in 5 minutes to rides collection
+
+    const now = new Date();
+    
+    ScheduledRide.find({time: {$lte: new Date(now.getTime() + 5*60000)}}, (err,rides) => {
+        if(err) console.log("Error in cron job", err);
+        else{
+            rides.forEach(ride => {
+                const newRide = new Ride({
+                    usernames: [ride.username],
+                    pickup: [ride.pickup],
+                    drop: [ride.drop],
+                    otp: [ride.otp],
+                    location: ride.location,
+                    travelTime: [ride.travelTime],
+                    dist: [ride.dist],
+                    pickLoc: [ride.pickLoc],
+                    dropLoc: [ride.dropLoc],
+                    sharing: 1
+                });
+                newRide.save();
+                ride.remove();
+            });
+        }
+    });
 
 
 });
