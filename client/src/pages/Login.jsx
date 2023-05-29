@@ -25,7 +25,7 @@ function Login() {
   },[]);
 
   const handleRider = async (e) => {
-      await axios.post('https://hopnon-server.onrender.com/login', {
+      await axios.post('/login', {
         usernameoremail: userNameOrEmail.current.value,
         password: password.current.value,
         customerType: "Rider"
@@ -34,7 +34,15 @@ function Login() {
         res = res.data;
         console.log(res,"data");
         if(res.success===true){
-            setCookies("userDetails",{username: res.username,customerType: res.customerType,emailVerified: res.emailVerified},{path: "/"});
+            const details = {
+              username: res.username,
+              name: res.name,
+              email: res.email,
+              mobile: res.mobile,
+              customerType: res.customerType,
+              emailVerified: res.emailVerified
+            }
+            setCookies("userDetails", details,{path: "/"});
             setCookies("jwtToken",res.token,{path: "/"});
             if(res.emailVerified === false){
               navigate("/verificationCode")
@@ -47,21 +55,32 @@ function Login() {
   }
 
   const handleDriver = async (e) => {
-      await axios.post('https://hopnon-server.onrender.com/login', {
+      await axios.post('/login', {
       usernameoremail: userNameOrEmail.current.value,
       password: password.current.value,
       customerType: "Driver"
       })
-      .then(response => {
-        if(response.data.success===true){
-            if(response.data.emailVerified===false){
-                setCookies("userDetails",response.data, {path: "/"})
-                navigate("/verificationCode")
+      .then(res => {
+        console.log(res);
+        res = res.data;
+        if(res.success===true){
+            const details = {
+              username: res.username,
+              name: res.name,
+              email: res.email,
+              mobile: res.mobile,
+              customerType: res.customerType,
+              emailVerified: res.emailVerified
+            }
+            setCookies("userDetails", details,{path: "/"});
+            setCookies("jwtToken",res.token,{path: "/"});
+            if(res.emailVerified===false){
+              navigate("/verificationCode")
             }else{
-                navigate("/verify")
+                navigate("/drive")
             }
         }else{
-          setmsg(response.data.msg)
+          setmsg(res.msg)
         }
       })
       .catch(error => {
@@ -71,8 +90,8 @@ function Login() {
 
   return (
     <div className='login' style={{ 
-      backgroundImage: `url(${process.env.PUBLIC_URL + '/bg.jpg'})`,
-      backgroundRepeat: 'no-repeat'
+      backgroundImage: `url(${process.env.PUBLIC_URL + '/bg.jpg'}) `,
+      backgroundRepeat: 'no-repeat',
     }}>
         <div className='login__logo'>
             <h1>HopOn</h1>

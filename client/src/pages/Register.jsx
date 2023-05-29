@@ -25,21 +25,19 @@ function Register() {
   }
 
   const handleDriver = async (e) => {
-      const randomCode = Math.floor(100000 + Math.random() * 900000);
       const details = {
         username: userName.current.value,
         name: name.current.value,
         email: email.current.value,
         mobile: mobile.current.value,
         password: password.current.value,
-        code: randomCode,
         customerType: "Driver"
       }
       setCookies("userDetails", details, {path : "/"})
-      await axios.post('https://hopnon-server.onrender.com/register', details)
+      await axios.post('/register', details)
     .then(response => {
       if(response.data.success===true){
-        navigate("/verificationCode");
+        navigate("/login");
       }else{
         setMsg(response.data.msg)
       }
@@ -50,21 +48,19 @@ function Register() {
   }
 
   const handleRider = async (e) => {
-      const randomCode = Math.floor(100000 + Math.random() * 900000);
       const details = {
         username: userName.current.value,
         name: name.current.value,
         email: email.current.value,
         mobile: mobile.current.value,
         password: password.current.value,
-        code: randomCode,
         customerType: "Rider"
       }
       setCookies("userDetails", details, {path : "/"})
-      await axios.post('https://hopnon-server.onrender.com/register', details)
+      await axios.post('/register', details)
     .then(response => {
       if(response.data.success===true){
-          navigate("/verificationCode");
+          navigate("/login");
       }else{
         setMsg(response.data.msg)
       }
@@ -77,7 +73,8 @@ function Register() {
   return (
     <div className='register' style={{ 
       backgroundImage: `url(${process.env.PUBLIC_URL + '/bg.jpg'})`,
-      backgroundRepeat: 'no-repeat'
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover'
     }}>
         <div className='register__logo'>
             <h1>HopOn</h1>
@@ -104,12 +101,12 @@ function Register() {
                     <input ref={mobile} type="tel" placeholder='Mobile Number' required/>
                 </div>
                 <div className="register__form__element password">
-                    <input ref={password} type="password" placeholder='Password' required/>
+                    <input ref={password} type="password" placeholder='Password' pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$" required/>
                 </div>
                 <div className='register__form__element register__buttons'>
                     <input type="submit" value="Register as Rider" onClick={handleRider}/>
                     <input type="submit" value="Register as Driver" onClick={handleDriver}/>
-                </div> 
+                </div>
                 <Link to="/" className='redirect__login'>
                       <div>
                         Return back to Login Page?

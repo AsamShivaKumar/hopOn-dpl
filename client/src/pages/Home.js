@@ -36,14 +36,11 @@ export default function Home(){
     const [time,setTime] = useState("");
     const [travelTime, setTravelTime] = useState(0);
     const [dist,setDist] = useState(0);
-    // const [book,setBook] = useState(false);
-    // const [comf, setComf] = useState(false);
     const rideShareDiv = useRef(null);
     const [msg,setMsg] = useState("");
     const [rideList,setRideList] = useState([]);
     const [showRideList,setShowRideList] = useState(true);
     const [cookies, setCookies] = useCookies();
-    // const [driverCoords,setDriverCoords] = useState({});
     const [socket,setSocket] = useState(null);
     const [rideShare,setRideShare] = useState(false);
     const [rideShareId,setRideShareId] = useState('');
@@ -67,7 +64,6 @@ export default function Home(){
       });
 
       setSocket(io("https://hopnon-server.onrender.com"));
-      // setCookies('driverCoords', stringify({}));
 
       return () => {if(map != null) map.remove()};
     },[]);

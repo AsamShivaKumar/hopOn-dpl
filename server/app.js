@@ -498,6 +498,7 @@ function authenticate(req,res,next){
 // -----------------------------------------------  PREM'S CODE  ----------------------------------------------- //
 
 app.post("/verificationCode", authenticate, function(req, res){
+    console.log(req.body)
     const code = req.user.code;
     if(code == req.body.enteredCode){
         const customerType = req.body.customerType;
@@ -508,17 +509,17 @@ app.post("/verificationCode", authenticate, function(req, res){
                 else{
                     driver.emailVerified = true;
                     driver.save();
-                    res.send({success: true, user: jwt.sign({name: driver.name, username: driver.username}, process.env.JWT_SECRET_KEY)});
+                    res.send({success: true, user: jwt.sign({name: driver.name, username: driver.username, customerType: driver.customerType}, process.env.JWT_SECRET_KEY)});
                 }
             })
         }else{
             Rider.findOne({username: name},(err,rider) => {
                 if(err) console.log(err)
                 else{
-                    // console.log(rider);
+                    console.log(rider);
                     rider.emailVerified = true;
                     rider.save();
-                    res.send({success: true, user: jwt.sign({name: rider.name, username: rider.username}, process.env.JWT_SECRET_KEY)});
+                    res.send({success: true, user: jwt.sign({name: rider.name, username: rider.username, customerType: rider.customerType}, process.env.JWT_SECRET_KEY)});
                 }
             })
         }
@@ -530,8 +531,8 @@ app.post("/verificationCode", authenticate, function(req, res){
 
 
 app.post('/register', async function(req, res){
+    console.log(req.body);
     const customerType = req.body.customerType;
-    console.log("register route", customerType);
     if(customerType === "Driver"){
         Driver.findOne({username:req.body.username},async function(err, driver){
             if(err){
@@ -544,19 +545,6 @@ app.post('/register', async function(req, res){
                         }
                         else{
                             if(driver1===null){
-                                const emailOptions = {
-                                    from: process.env.FROM_EMAIL,
-                                    to: req.body.email,
-                                    subject: "HopOn Verification code",
-                                    text: "Your email verification code is: "+req.body.code1
-                                }
-                                transporter.sendMail(emailOptions,function(err, info){
-                                    if(err){
-                                        console.log(err);
-                                        return;
-                                    }
-                                });
-
                                 bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
                                     if(!err){
                                         const newDriver = new Driver({
@@ -566,9 +554,7 @@ app.post('/register', async function(req, res){
                                             mobile: req.body.mobile,
                                             password: hash,
                                             customerType: "Driver",
-                                            emailVerified: false,
-                                            latitude: 0,
-                                            longitude: 0
+                                            emailVerified: false
                                         });
                                         newDriver.save();
                                         res.send({success: true});
@@ -602,18 +588,6 @@ app.post('/register', async function(req, res){
                         }
                         else{
                             if(rider1===null){
-                                const options = {
-                                    from: "loop2022@outlook.in",
-                                    to: req.body.email,
-                                    subject: "HopOn Verification code",
-                                    text: "Your verification code is: "+req.body.code
-                                }
-                                transporter.sendMail(options,function(err, info){
-                                    if(err){
-                                        console.log(err);
-                                        return;
-                                    }
-                                });
                                 const hash = bcrypt.hashSync(req.body.password, saltRounds);
                                 const newRider = new Rider({
                                     username: req.body.username,
@@ -660,6 +634,7 @@ function sendEmail(email){
 
 app.post("/login",async function(req, res){
     const customerType = req.body.customerType;
+    console.log(req.body);
     if(customerType==="Driver"){
         Driver.findOne({username: req.body.usernameoremail},function(err,driver){
             if(err){
@@ -676,6 +651,7 @@ app.post("/login",async function(req, res){
                             }
                             else{
                                 const verified = bcrypt.compareSync(req.body.password, driver.password);
+                                console.log(verified);
                                 if(verified){
                                     var code = null
                                     if(driver.emailVerified===false){
@@ -687,6 +663,9 @@ app.post("/login",async function(req, res){
                                     res.send({
                                         success:true,
                                         username: driver.username,
+                                        name: driver.name,
+                                        mobile: driver.mobile,
+                                        email: driver.email,
                                         customerType: driver.customerType,
                                         emailVerified: driver.emailVerified,
                                         token: jwtToken
@@ -712,6 +691,9 @@ app.post("/login",async function(req, res){
                         res.send({
                             success:true,
                             username: driver.username,
+                            name: driver.name,
+                            mobile: driver.mobile,
+                            email: driver.email,
                             customerType: driver.customerType,
                             emailVerified: driver.emailVerified,
                             token: jwtToken
@@ -750,6 +732,9 @@ app.post("/login",async function(req, res){
                                     res.send({
                                         success:true,
                                         username: rider.username,
+                                        name: rider.name,
+                                        mobile: rider.mobile,
+                                        email: rider.email,
                                         customerType: rider.customerType,
                                         emailVerified: rider.emailVerified,
                                         token: jwtToken
@@ -775,6 +760,9 @@ app.post("/login",async function(req, res){
                         res.send({
                             success:true,
                             username: rider.username,
+                            name: rider.name,
+                            mobile: rider.mobile,
+                            email: rider.email,
                             customerType: rider.customerType,
                             emailVerified: rider.emailVerified,
                             token: jwtToken
