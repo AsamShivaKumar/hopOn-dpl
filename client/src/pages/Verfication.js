@@ -9,7 +9,7 @@ import "../styles/verification.css"
 
 function Verification(){
 
-    // const {cookies, setCookie} = useCookies();
+    const [cookies, setCookies] = useCookies();
     // const driver_data = cookies.driver
     // const name = driver_data.name
     // const docs = driver_data.docs
@@ -37,8 +37,15 @@ function Verification(){
     const [doc,setDoc] = useState("Profile Photo");
     const [insrt,setInsrt] = useState(instructions[0]);
     const [url,setUrl] = useState("profile.jpg"); 
+    // const [cookies,setCookies] = useCookies();
     
     useEffect(() => {
+
+        console.log(cookies);
+
+        if(cookies.userDetails.customerType !== "Driver") navigate("/"); 
+
+        console.log("here!");
         
         axios.post("https://hopnon-server.onrender.com/fetch-driver-details", {
             username: name
@@ -63,7 +70,6 @@ function Verification(){
             if(verified) navigate("/drive");
         });
 
-        if(cookies.userDetails.customerType !== "Driver") navigate("/"); 
     },[]);
 
     function displayUploadDiv(evt){
@@ -159,7 +165,7 @@ function Verification(){
                     </div>
                </div>
                { fileUpload && <FileUpload back = {back} doc = {doc} instr = {insrt} url = {url} handleChange = {(evt) => (uploadDoc(evt))}/>}
-               <div className={"bgDiv " + bg}></div>
+               {/* <div className={"bgDiv " + bg}></div> */}
             </div>
         </>
     )
