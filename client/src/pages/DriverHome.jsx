@@ -36,6 +36,7 @@ function DriverHome() {
   // use useEffect and allow only the users who are drivers ************
 
   useEffect(() => {
+    if(cookies.jwtToken === undefined) navigate("/");
     if(cookies.userDetails.customerType !== "Driver") navigate("/");
   },[]);
   

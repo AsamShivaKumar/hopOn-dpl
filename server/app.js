@@ -54,7 +54,12 @@ const driverSchema = new mongoose.Schema({
     heading: Number,
     // name of the area driver is located in
     location: {type: String, default: ""},
-    reg_no: {type: String, default: "XX0000"}
+    reg_no: {type: String, default: "XX0000"},
+    emailVerified: {
+        type: Boolean,
+        default: false,
+        required: true
+    }
 });
 
 const riderSchema = new mongoose.Schema({
