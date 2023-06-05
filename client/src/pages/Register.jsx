@@ -34,7 +34,7 @@ function Register() {
         customerType: "Driver"
       }
       setCookies("userDetails", details, {path : "/"})
-      await axios.post('/register', details)
+      await axios.post('https://hopnon-server.onrender.com/register', details)
     .then(response => {
       if(response.data.success===true){
         navigate("/login");
@@ -57,7 +57,7 @@ function Register() {
         customerType: "Rider"
       }
       setCookies("userDetails", details, {path : "/"})
-      await axios.post('/register', details)
+      await axios.post('https://hopnon-server.onrender.com/register', details)
     .then(response => {
       if(response.data.success===true){
           navigate("/login");
