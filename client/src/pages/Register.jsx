@@ -101,7 +101,7 @@ function Register() {
                     <input ref={mobile} type="tel" placeholder='Mobile Number' required/>
                 </div>
                 <div className="register__form__element password">
-                    <input ref={password} type="password" placeholder='Password' pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$" required/>
+                    <input ref={password} type="password" placeholder='Password' pattern="^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[a-zA-Z!#$%&? ])[a-zA-Z0-9!#$%&?]{8,20}$" required/>
                 </div>
                 <div className='register__form__element register__buttons'>
                     <input type="submit" value="Register as Rider" onClick={handleRider}/>

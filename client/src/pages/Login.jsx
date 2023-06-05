@@ -77,7 +77,7 @@ function Login() {
             if(res.emailVerified===false){
               navigate("/verificationCode")
             }else{
-                navigate("/drive")
+                navigate("/verify")
             }
         }else{
           setmsg(res.msg)
